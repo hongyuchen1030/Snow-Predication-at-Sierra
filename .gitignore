@@ -1,0 +1,31 @@
+# Codex local agent instructions
+AGENTS.md
+.codex
+
+# Large local-only project trees
+artifacts/
+experiments/
+thirdparties/
+
+# local experiments
+outputs/
+logs/
+checkpoints/
+results/
+
+# Sierra ForeSWE runtime artifacts
+experiments/foreswe_sierra_station/outputs/
+experiments/foreswe_sierra_station/results/
+experiments/foreswe_sierra_station/checkpoints/
+experiments/foreswe_sierra_station/logs/
+experiments/foreswe_sierra_station/*_home_pre_scratch_*/
+experiments/foreswe_sierra_station/**/*.pt
+experiments/foreswe_sierra_station/**/*.pkl
+
+# Python
+__pycache__/
+*.pyc
+
+# Conda / env
+.env
+.envrc

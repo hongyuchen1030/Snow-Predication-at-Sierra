@@ -8,11 +8,11 @@ if str(PROJECT_ROOT) not in sys.path:
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from snow_ml.train import run_one_step_from_raw
+from snow_ml.t2m_validation import run_t2m_anomaly_validation
 
 
 def main() -> None:
-    run_one_step_from_raw()
+    run_t2m_anomaly_validation()
 
 
 if __name__ == "__main__":
