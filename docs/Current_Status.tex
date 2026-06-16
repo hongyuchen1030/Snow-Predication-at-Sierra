@@ -1410,7 +1410,26 @@ robust SST predictors in the same way as the paper's cross-dataset logic; at pre
 structures are dataset-dependent, with only a later midlatitude western Pacific mode showing broad
 agreement.
 
-\subsection{Latest Session: Known-Climate-Mode SWE Baseline}
+
+\section{Understanding SWE and SST}
+
+Our overall goal is to understand and reduce the SST predictor space for Sierra SWE prediction.
+The target is April 1 SWE over the Sierra Nevada, possibly separated into northern, middle, and
+southern Sierra subregions. The candidate predictor is monthly SST anomaly from September through
+March over the broad Pacific domain, defined here as $10^\circ\mathrm{S}$--$60^\circ\mathrm{N}$
+and $120^\circ\mathrm{E}$--$280^\circ\mathrm{E}$ in $0..360$ longitude convention. Because only
+about 37 water years are available, the full SST field cannot be used directly as model input
+without severe overfitting. Therefore, we first need to identify which parts of the SST information
+are most relevant to SWE before training the final prediction model.
+
+We will pursue two complementary directions.
+
+The first direction is a known-climate-mode baseline. In this approach, we reduce SST using established oceanic modes of variability, such as broad Pacific SST EOF-PC modes, Niño 3.4, and AMV/AMO. These predictors are constructed from physically motivated ocean domains using either area averaging or EOF/PCA-based projection. Following the logic of the recent climate-mode predictability paper, we will test how much April 1 SWE variability can be predicted from these climate-mode predictor time series under leave-one-year-out cross-validation. This direction asks whether known large-scale SST variability patterns contain useful predictive information for Sierra SWE.
+
+The second direction is direct SST-field discovery. In this approach, we do not assume that the SWE-relevant SST signal must align with predefined climate modes or EOF patterns. Instead, we start from the full Pacific SST anomaly field from September through March and ask which months, locations, or coherent SST regions are most strongly and stably related to April 1 SWE. This direction is needed because EOF-based climate modes may compress the SST field too strongly and may miss smaller or more regional SST signals that are still relevant to Sierra SWE.
+
+
+\subsection{Known-Climate-Mode SWE Baseline}
 \label{subsec:swe_known_climate_mode_baseline}
 
 \begin{figure}[h]
@@ -1423,17 +1442,14 @@ groups.}
 \label{fig:sources_of_long_term_predictability}
 \end{figure}
 
+The reference paper: \href{https://doi.org/10.1038/s43247-024-01594-2}{Higher-order internal modes of variability imprinted in year-to-year California streamflow changes}.
 The goal of the latest session is to introduce the first baseline direction for the Sierra SWE
-prediction project: a known-climate-mode baseline. Instead of starting immediately from the full
-Pacific SST grid, we first build a compact predictor set from ocean-side climate-variability modes
-that are physically relevant to western U.S. hydroclimate and may help explain Sierra Nevada SWE
-predictability. The initial ocean-mode baseline is restricted to three predictor groups: COBE2
+prediction project: a known-climate-mode baseline. 
+
+
+The initial ocean-mode baseline is restricted to three predictor groups: COBE2
 broad Pacific SST EOF-PC modes, the Ni\~no 3.4 SST index, and AMV/AMO North Atlantic SST EOF-PC
-modes. The purpose of this baseline is to test how much April 1 Sierra SWE predictability can be
-explained by established oceanic climate-mode predictors before moving to direct full-field SST
-discovery. MJO is intentionally excluded from this ocean-mode baseline. MJO is an
-atmospheric/subseasonal mode and should be handled later using appropriate phase/amplitude indices
-rather than monthly SST EOFs.
+modes. 
 
 The existing COBE2 Pacific SST EOF-PC products should be described as broad Pacific SST modes over
 $10^\circ\mathrm{S}$--$60^\circ\mathrm{N}$ and $120^\circ\mathrm{E}$--$280^\circ\mathrm{E}$ in
@@ -1446,18 +1462,65 @@ series with known climate indices.
 \begin{table}[h]
 \centering
 \small
-\begin{tabular}{>{\raggedright\arraybackslash}p{0.12\linewidth} >{\raggedright\arraybackslash}p{0.08\linewidth} >{\raggedright\arraybackslash}p{0.17\linewidth} >{\raggedright\arraybackslash}p{0.18\linewidth} >{\raggedright\arraybackslash}p{0.21\linewidth} >{\raggedright\arraybackslash}p{0.16\linewidth}}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.14\linewidth}
+                >{\raggedright\arraybackslash}p{0.08\linewidth}
+                >{\raggedright\arraybackslash}p{0.20\linewidth}
+                >{\raggedright\arraybackslash}p{0.20\linewidth}
+                >{\raggedright\arraybackslash}p{0.24\linewidth}
+                >{\raggedright\arraybackslash}p{0.10\linewidth}}
 \toprule
-Mode / index & Variable & Domain & Method & Expected predictor columns & Storage location / status \\
+Mode / index & Variable & Domain & Method & Expected predictor columns & Status \
 \midrule
-COBE2 Pacific SST modes & SST & $10^\circ\mathrm{S}$--$60^\circ\mathrm{N}$, $120^\circ\mathrm{E}$--$280^\circ\mathrm{E}$ in $0..360$, equivalently $120^\circ\mathrm{E}$--$80^\circ\mathrm{W}$ & EOF1--EOF6 / PC1--PC6 from the existing COBE2 broad Pacific SST EOF workflow & Sep--Mar Pacific SST PC1--PC6 values. These modes may contain basin-wide warming, ENSO-like variability, and PDO-like variability, but those interpretations should only be assigned after inspecting the EOF maps and PC correlations. & Reuse existing generated COBE2 Pacific EOF/PC artifacts. Do not regenerate unless missing or unusable: \path{artifacts/sst_pca/cobe2_global_monthly_climatology_anomaly/cobe2_global_monthly_clim_sst_eofs.nc}; \path{artifacts/cobe2_pacific_sierra_t2m_level1_diagnostic/cobe2_pacific_sierra_cobe2_eofs_modes1to6.png}; \path{/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/cobe2_pacific_sierra_t2m_level2_pc1to6/cobe2_pacific_sierra_t2m_level2_pc1to6.nc}; \path{artifacts/cobe2_pacific_sierra_t2m_level2_pc1to6/run.log}. \\
-Ni\~no 3.4 & SST & $5^\circ\mathrm{S}$--$5^\circ\mathrm{N}$, $190^\circ\mathrm{E}$--$240^\circ\mathrm{E}$ in $0..360$, equivalently $170^\circ\mathrm{W}$--$120^\circ\mathrm{W}$ & Area-weighted domain average of monthly SST anomalies & \texttt{Nino34\_Sep}, \texttt{Nino34\_Oct}, \texttt{Nino34\_Nov}, \texttt{Nino34\_Dec}, \texttt{Nino34\_Jan}, \texttt{Nino34\_Feb}, \texttt{Nino34\_Mar} & Already generated: \path{artifacts/swe_climate_mode_baseline/nino34/nino34_monthly_wy1985_2021_sep_mar.csv}; \path{artifacts/swe_climate_mode_baseline/nino34/nino34_monthly_wy1985_2021_sep_mar.nc}; \path{artifacts/swe_climate_mode_baseline/nino34/nino34_monthly_wy1985_2021_sep_mar_summary.json}. \\
-AMV / AMO & SST & $0^\circ$--$70^\circ\mathrm{N}$, $280^\circ\mathrm{E}$--$360^\circ\mathrm{E}$ in $0..360$, equivalently $80^\circ\mathrm{W}$--$0^\circ$ & Separate EOF1--EOF6 / PC1--PC6 analysis over the North Atlantic SST anomaly field; this does not reuse the Pacific EOF basis & Sep--Mar AMV/AMO PC1--PC6 values & Generated: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_eofs_pc1to6.nc}; \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_pc1to6_wy1985_2021_sep_mar.csv}; \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_pc1to6_summary.json}; \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}; \path{artifacts/swe_climate_mode_baseline/amv_amo/run.log}. \\
+COBE2 Pacific SST modes
+& SST
+& $10^\circ\mathrm{S}$--$60^\circ\mathrm{N}$, $120^\circ\mathrm{E}$--$280^\circ\mathrm{E}$ in $0..360$, equivalently $120^\circ\mathrm{E}$--$80^\circ\mathrm{W}$
+& EOF1--EOF6 / PC1--PC6 from the existing COBE2 broad Pacific SST EOF workflow
+& Sep--Mar Pacific SST PC1--PC6 values. These modes may contain basin-wide warming, ENSO-like variability, and PDO-like variability, but those interpretations should only be assigned after inspecting the EOF maps and PC correlations.
+& Existing artifacts; reuse \
+
+Ni~no 3.4
+& SST
+& $5^\circ\mathrm{S}$--$5^\circ\mathrm{N}$, $190^\circ\mathrm{E}$--$240^\circ\mathrm{E}$ in $0..360$, equivalently $170^\circ\mathrm{W}$--$120^\circ\mathrm{W}$
+& Area-weighted domain average of monthly SST anomalies
+& \texttt{Nino34_Sep}, \texttt{Nino34_Oct}, \texttt{Nino34_Nov}, \texttt{Nino34_Dec}, \texttt{Nino34_Jan}, \texttt{Nino34_Feb}, \texttt{Nino34_Mar}
+& Generated \
+
+AMV / AMO
+& SST
+& $0^\circ$--$70^\circ\mathrm{N}$, $280^\circ\mathrm{E}$--$360^\circ\mathrm{E}$ in $0..360$, equivalently $80^\circ\mathrm{W}$--$0^\circ$
+& Separate EOF1--EOF6 / PC1--PC6 analysis over the North Atlantic SST anomaly field; this does not reuse the Pacific EOF basis
+& Sep--Mar AMV/AMO PC1--PC6 values
+& Generated \
 \bottomrule
 \end{tabular}
-\caption{Ocean-side known-climate-mode baseline predictors for the Sierra SWE project.}
+\caption{Ocean-side known-climate-mode baseline predictors for the Sierra SWE project. Exact artifact paths are listed below the table to keep the table readable.}
 \label{tab:swe_known_climate_mode_baseline}
 \end{table}
+
+\paragraph{Artifact paths for Table~\ref{tab:swe_known_climate_mode_baseline}.}
+The COBE2 Pacific SST EOF-PC products should be reused from the existing artifacts:
+\begin{itemize}
+    \item EOF/PC source: \path{artifacts/sst_pca/cobe2_global_monthly_climatology_anomaly/cobe2_global_monthly_clim_sst_eofs.nc}
+    \item Existing EOF diagnostic figure: \path{artifacts/cobe2_pacific_sierra_t2m_level1_diagnostic/cobe2_pacific_sierra_cobe2_eofs_modes1to6.png}
+    \item Existing Sep--Mar overlap PC file: \path{/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/cobe2_pacific_sierra_t2m_level2_pc1to6/cobe2_pacific_sierra_t2m_level2_pc1to6.nc}
+    \item Run log: \path{artifacts/cobe2_pacific_sierra_t2m_level2_pc1to6/run.log}
+\end{itemize}
+
+The Ni~no 3.4 SST anomaly index has already been generated:
+\begin{itemize}
+    \item CSV table: \path{artifacts/swe_climate_mode_baseline/nino34/nino34_monthly_wy1985_2021_sep_mar.csv}
+    \item NetCDF file: \path{artifacts/swe_climate_mode_baseline/nino34/nino34_monthly_wy1985_2021_sep_mar.nc}
+    \item Summary metadata: \path{artifacts/swe_climate_mode_baseline/nino34/nino34_monthly_wy1985_2021_sep_mar_summary.json}
+\end{itemize}
+
+The AMV/AMO North Atlantic SST EOF-PC product has already been generated:
+\begin{itemize}
+    \item EOF/PC NetCDF file: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_eofs_pc1to6.nc}
+    \item Sep--Mar PC predictor table: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_pc1to6_wy1985_2021_sep_mar.csv}
+    \item Summary metadata: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_pc1to6_summary.json}
+    \item EOF diagnostic figure: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}
+    \item Run log: \path{artifacts/swe_climate_mode_baseline/amv_amo/run.log}
+\end{itemize}
 
 \paragraph{Clarification.}
 For EOF-based predictors, the machine-learning input columns are the PC time series, not the EOF
