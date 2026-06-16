@@ -1469,28 +1469,28 @@ series with known climate indices.
                 >{\raggedright\arraybackslash}p{0.24\linewidth}
                 >{\raggedright\arraybackslash}p{0.10\linewidth}}
 \toprule
-Mode / index & Variable & Domain & Method & Expected predictor columns & Status \
+Mode / index & Variable & Domain & Method & Expected predictor columns & Status \\
 \midrule
 COBE2 Pacific SST modes
 & SST
 & $10^\circ\mathrm{S}$--$60^\circ\mathrm{N}$, $120^\circ\mathrm{E}$--$280^\circ\mathrm{E}$ in $0..360$, equivalently $120^\circ\mathrm{E}$--$80^\circ\mathrm{W}$
 & EOF1--EOF6 / PC1--PC6 from the existing COBE2 broad Pacific SST EOF workflow
 & Sep--Mar Pacific SST PC1--PC6 values. These modes may contain basin-wide warming, ENSO-like variability, and PDO-like variability, but those interpretations should only be assigned after inspecting the EOF maps and PC correlations.
-& Existing artifacts; reuse \
+& Existing artifacts; reuse \\
 
 Ni~no 3.4
 & SST
 & $5^\circ\mathrm{S}$--$5^\circ\mathrm{N}$, $190^\circ\mathrm{E}$--$240^\circ\mathrm{E}$ in $0..360$, equivalently $170^\circ\mathrm{W}$--$120^\circ\mathrm{W}$
 & Area-weighted domain average of monthly SST anomalies
-& \texttt{Nino34_Sep}, \texttt{Nino34_Oct}, \texttt{Nino34_Nov}, \texttt{Nino34_Dec}, \texttt{Nino34_Jan}, \texttt{Nino34_Feb}, \texttt{Nino34_Mar}
-& Generated \
+& \texttt{Nino34\_Sep}, \texttt{Nino34\_Oct}, \texttt{Nino34\_Nov}, \texttt{Nino34\_Dec}, \texttt{Nino34\_Jan}, \texttt{Nino34\_Feb}, \texttt{Nino34\_Mar}
+& Generated \\
 
 AMV / AMO
 & SST
 & $0^\circ$--$70^\circ\mathrm{N}$, $280^\circ\mathrm{E}$--$360^\circ\mathrm{E}$ in $0..360$, equivalently $80^\circ\mathrm{W}$--$0^\circ$
 & Separate EOF1--EOF6 / PC1--PC6 analysis over the North Atlantic SST anomaly field; this does not reuse the Pacific EOF basis
 & Sep--Mar AMV/AMO PC1--PC6 values
-& Generated \
+& Generated \\
 \bottomrule
 \end{tabular}
 \caption{Ocean-side known-climate-mode baseline predictors for the Sierra SWE project. Exact artifact paths are listed below the table to keep the table readable.}
@@ -1518,9 +1518,16 @@ The AMV/AMO North Atlantic SST EOF-PC product has already been generated:
     \item EOF/PC NetCDF file: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_eofs_pc1to6.nc}
     \item Sep--Mar PC predictor table: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_pc1to6_wy1985_2021_sep_mar.csv}
     \item Summary metadata: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_pc1to6_summary.json}
-    \item EOF diagnostic figure: \path{artifacts/swe_climate_mode_baseline/amv_amo/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}
+    \item EOF diagnostic figure copied into the documentation figures directory: \path{figures/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}
     \item Run log: \path{artifacts/swe_climate_mode_baseline/amv_amo/run.log}
 \end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\linewidth]{../figures/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}
+\caption{North Atlantic AMV/AMO baseline EOF diagnostic for COBE2 SST over $0^\circ$--$70^\circ\mathrm{N}$ and $280^\circ\mathrm{E}$--$360^\circ\mathrm{E}$ in the $0..360$ longitude convention. The panels show EOF modes 1--6 retained for the AMV/AMO predictor-family baseline.}
+\label{fig:amv_amo_cobe2_north_atlantic_eofs_modes1to6}
+\end{figure}
 
 \paragraph{Clarification.}
 For EOF-based predictors, the machine-learning input columns are the PC time series, not the EOF
