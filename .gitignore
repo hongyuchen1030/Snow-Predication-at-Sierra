@@ -29,3 +29,9 @@ __pycache__/
 # Conda / env
 .env
 .envrc
+
+# Ignore log files anywhere in the repo
+*.log
+
+# Documentation build logs
+docs/*.log
