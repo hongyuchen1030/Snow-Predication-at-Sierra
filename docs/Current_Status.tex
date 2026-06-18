@@ -234,8 +234,8 @@ PCs, $\beta_k(r)$ maps, $\rho_k(r)$ maps, and $R_k^2(r)$ maps together. \\
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.49\linewidth]{../figures/cobe2_pacific_sierra_cobe2_eofs_modes1to6.png}
-\includegraphics[width=0.49\linewidth]{../figures/cobe2_pacific_sierra_t2m_level1_maps_modes1to6.png}
+\includegraphics[width=0.49\linewidth]{../figures/cobe2_pacific_sierra_cobe2_eofs_modes1to6.pdf}
+\includegraphics[width=0.49\linewidth]{../figures/cobe2_pacific_sierra_t2m_level1_maps_modes1to6.pdf}
 \caption{Observed Pacific-region SST EOF and T2m-response diagnostics for modes 1--6. Left:
 regional COBE2 EOF patterns over latitude $-10^\circ$ to $60^\circ$ and longitude $120^\circ$ to
 $280^\circ$ in $0..360$ coordinates. Right: corresponding level-1 $\beta_k(r)$, $\rho_k(r)$, and
@@ -298,7 +298,7 @@ PCs. In the current repo, this six-PC observed diagnostic is implemented in
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.82\linewidth]{../figures/cobe2_pacific_sierra_t2m_level2_pc1to6_maps.png}
+\includegraphics[width=0.82\linewidth]{../figures/cobe2_pacific_sierra_t2m_level2_pc1to6_maps.pdf}
 \caption{Observed six-PC multivariate SST--T2m diagnostic over the Pacific-region analysis domain.
 The coefficient maps correspond to the rows of $\hat{B}$ in Eq.~\eqref{eq:bhat_multi}, so each
 panel shows the partial T2m response pattern for one standardized SST PC while holding the other
@@ -450,7 +450,7 @@ the remaining months gives the twelve monthly panels.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.88\linewidth]{../figures/cobe2_pacific_sierra_t2m_level2_pc1to6_monthly_r2_maps.png}
+\includegraphics[width=0.88\linewidth]{../figures/cobe2_pacific_sierra_t2m_level2_pc1to6_monthly_r2_maps.pdf}
 \caption{Monthly six-PC $R^2(r)$ maps over the Sierra evaluation region. Each panel is fit using
 only the overlap samples from that calendar month. The predictors are standardized COBE2 SST
 PC1--PC6 from the expanded Pacific-domain run, and the target is ERA5-Land monthly T2m anomaly
@@ -476,7 +476,7 @@ region where COBE2 has valid ocean data and the remapped WUSD-03 SST is finite.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.95\linewidth]{../figures/cobe2_eof1_and_wusd3_d01_pacific_coverage.png}
+\includegraphics[width=0.95\linewidth]{../figures/cobe2_eof1_and_wusd3_d01_pacific_coverage.pdf}
 \caption{Pacific-domain coverage mismatch for the WUSD-03 SST projection setup. The left panel
 shows COBE2 EOF1 over the full Pacific predictor domain, with the black contour marking the part
 of that domain where WUSD-03 d01 contributes SST after regridding. The right panel shows the same
@@ -642,7 +642,7 @@ comparison.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.88\linewidth]{../figures/cobe2_sharedregion_sierra_t2m_level2_pc1to6_monthly_r2_maps.png}
+\includegraphics[width=0.88\linewidth]{../figures/cobe2_sharedregion_sierra_t2m_level2_pc1to6_monthly_r2_maps.pdf}
 \caption{Monthly six-PC $R^2(r)$ maps over the Sierra evaluation region using COBE2 SST restricted
 to the WUSD-03 d01 SST coverage. The SST EOFs and PCs are recomputed from COBE2 SST anomalies over
 the shared region $M$, rather than using the full-Pacific COBE2 EOFs. Each panel is fit using only
@@ -785,7 +785,7 @@ Figure~\ref{fig:cobe2_sharedregion_monthly_r2_maps}.
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.88\linewidth]{../figures/wusd3_sharedregion_pc_t2m_level2_pc1to6_monthly_r2_maps.png}
+\includegraphics[width=0.88\linewidth]{../figures/wusd3_sharedregion_pc_t2m_level2_pc1to6_monthly_r2_maps.pdf}
 \caption{Monthly six-PC $R^2(r)$ maps over the Sierra evaluation region using WUSD-03 SST
 projected onto the shared-region COBE2 EOF basis. WUSD-03 SST anomalies are first projected onto
 the COBE2 EOFs computed only over the WUSD-03 d01 SST coverage region. The resulting projected
@@ -1414,7 +1414,7 @@ agreement.
 \section{Understanding SWE and SST}
 
 Our overall goal is to understand and reduce the SST predictor space for Sierra SWE prediction.
-The target is April 1 SWE over the Sierra Nevada, possibly separated into northern, middle, and
+The target is April 1 SWE over the Sierra Nevada, possibly separated into northern, central, and
 southern Sierra subregions. The candidate predictor is monthly SST anomaly from September through
 March over the broad Pacific domain, defined here as $10^\circ\mathrm{S}$--$60^\circ\mathrm{N}$
 and $120^\circ\mathrm{E}$--$280^\circ\mathrm{E}$ in $0..360$ longitude convention. Because only
@@ -1428,13 +1428,54 @@ The first direction is a known-climate-mode baseline. In this approach, we reduc
 
 The second direction is direct SST-field discovery. In this approach, we do not assume that the SWE-relevant SST signal must align with predefined climate modes or EOF patterns. Instead, we start from the full Pacific SST anomaly field from September through March and ask which months, locations, or coherent SST regions are most strongly and stably related to April 1 SWE. This direction is needed because EOF-based climate modes may compress the SST field too strongly and may miss smaller or more regional SST signals that are still relevant to Sierra SWE.
 
+The Sierra SWE dataset visualization is provided in Fig.~\ref{fig:swe_dem_four_panel_diagnostic}.
+
+
+To define regional SWE targets, we divide the Sierra SWE grid into northern, central, and southern
+regions. The SWE regions are defined using the CDEC/DWR basin-based
+snowpack grouping:
+\[
+\begin{aligned}
+\text{North Sierra} &: \text{Trinity through Feather and Truckee},\\
+\text{Central Sierra} &: \text{Yuba and Tahoe through Merced and Walker},\\
+\text{South Sierra} &: \text{San Joaquin and Mono through Kern}.
+\end{aligned}
+\]
+
+The resulting Sierra SWE regional mask products are stored at
+\path{artifacts/swe_target_spatial_diagnostic/basin_assignment_grid_wy2021.npz}
+and
+\path{artifacts/swe_target_spatial_diagnostic/basin_assignment_grid_wy2021.nc}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.98\linewidth]{../figures/basin_assignment_test_wy2021.pdf}
+\caption{
+Diagnostic visualization of the CDEC/DWR basin-based grouping used to assign active April 1 SWE
+grid cells to North, Central, and South Sierra regions.
+}
+\label{fig:basin_assignment_test_wy2021}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.98\linewidth]{../figures/swe_dem_four_panel_diagnostic.pdf}
+\caption{
+Spatial diagnostic of the Sierra SWE target dataset. The figure compares the April 1 SWE
+climatology on the raw Sierra SWE grid, the USGS DEM terrain context over the Sierra Nevada
+diagnostic box, the SWE footprint overlaid on the DEM hillshade, and a binary SWE-footprint
+diagnostic. This visualization is used to verify that the SWE target grid aligns with the
+Sierra Nevada high-elevation region before defining North/Central/South Sierra SWE targets.
+}
+\label{fig:swe_dem_four_panel_diagnostic}
+\end{figure}
 
 \subsection{Known-Climate-Mode SWE Baseline}
 \label{subsec:swe_known_climate_mode_baseline}
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.96\linewidth]{../figures/souces_of_long_term_predictability.png}
+\includegraphics[width=0.96\linewidth]{../figures/souces_of_long_term_predictability.pdf}
 \caption{Broader sources of long-term predictability relevant to Sierra SWE, spanning the
 atmosphere, land, and ocean. In the current baseline workflow, we start from the ocean side first
 by testing ocean modes of variability before adding later atmospheric or land-based predictor
@@ -1524,7 +1565,7 @@ The AMV/AMO North Atlantic SST EOF-PC product has already been generated:
 
 \begin{figure}[h]
 \centering
-\includegraphics[width=0.92\linewidth]{../figures/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}
+\includegraphics[width=0.92\linewidth]{../figures/amv_amo_cobe2_north_atlantic_eofs_modes1to6.pdf}
 \caption{North Atlantic AMV/AMO baseline EOF diagnostic for COBE2 SST over $0^\circ$--$70^\circ\mathrm{N}$ and $280^\circ\mathrm{E}$--$360^\circ\mathrm{E}$ in the $0..360$ longitude convention. The panels show EOF modes 1--6 retained for the AMV/AMO predictor-family baseline.}
 \label{fig:amv_amo_cobe2_north_atlantic_eofs_modes1to6}
 \end{figure}
@@ -1559,13 +1600,13 @@ How much out-of-sample April 1 Sierra SWE predictability is contained in the oce
 set consisting of COBE2 Pacific SST PCs, Ni~no 3.4, and AMV/AMO North Atlantic SST PCs?
 \end{quote}
 
-The target variable is April 1 SWE. Because the Sierra Nevada is divided into northern, middle, and
+The target variable is April 1 SWE. Because the Sierra Nevada is divided into northern, central, and
 southern subregions to avoid forcing one spatially averaged model onto regions with potentially
 different climate sensitivities, the three SWE targets are modeled separately:
 \[
 Y_N(t) = \mathrm{SWE}_{N,\mathrm{Apr1}}(t),
 \qquad
-Y_M(t) = \mathrm{SWE}_{M,\mathrm{Apr1}}(t),
+Y_C(t) = \mathrm{SWE}_{C,\mathrm{Apr1}}(t),
 \qquad
 Y_S(t) = \mathrm{SWE}_{S,\mathrm{Apr1}}(t),
 \]
@@ -1574,12 +1615,16 @@ baseline therefore fits three separate models:
 \[
 X(t,:) \rightarrow Y_N(t),
 \qquad
-X(t,:) \rightarrow Y_M(t),
+X(t,:) \rightarrow Y_C(t),
 \qquad
 X(t,:) \rightarrow Y_S(t).
 \]
+The equal-width latitude-band North/Middle/South split used in the first quick ridge baseline
+should be treated as provisional only. Before accepting any final regional SWE target definition,
+we are now verifying the actual SWE source-grid spatial footprint, the current Sierra mask, and
+whether the valid SWE region aligns with the intended Sierra Nevada mountain range.
 The same ocean-mode predictor matrix $X$ is used for all three targets, but the regression
-coefficients are fitted independently for the northern, middle, and southern Sierra targets.
+coefficients are fitted independently for the northern, central, and southern Sierra targets.
 
 The ocean-mode predictor matrix is denoted
 \[
@@ -1876,5 +1921,211 @@ with files such as:
 \path{artifacts/swe_climate_mode_baseline/ocean_mode_only_ridge/observed_vs_predicted_timeseries.png}\\
 \path{artifacts/swe_climate_mode_baseline/ocean_mode_only_ridge/run.log}
 \end{quote}
+
+\paragraph{Current basin-based LOYO ridge result.}
+The first basin-based ocean-mode-only LOYO ridge experiment has now been run with
+\path{scripts/run_ocean_mode_only_swe_ridge.py}. The output folder is
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_ridge/}. The merged predictor table is
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_ridge/ocean_mode_predictors_wy1985_2021.csv},
+and the April 1 SWE target table is
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_ridge/sierra_apr1_swe_north_central_south_wy1985_2021.csv}.
+The LOYO metrics are stored in
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_ridge/loyo_metrics.json}, and the main
+diagnostic figures are
+\path{figures/observed_vs_predicted_timeseries.pdf}
+and
+\path{figures/observed_vs_predicted_scatter.pdf}.
+Under strict LOYO validation with the basin-based North/Central/South SWE targets, the current
+ocean-mode-only ridge baseline does not yet show useful out-of-sample April 1 SWE skill:
+North Sierra has $R^2_{\mathrm{LOYO}}=-1.834$, $\mathrm{RMSE}=0.358\,\mathrm{m}$,
+$\mathrm{MAE}=0.307\,\mathrm{m}$, and $r=0.019$; Central Sierra has
+$R^2_{\mathrm{LOYO}}=-1.423$, $\mathrm{RMSE}=0.455\,\mathrm{m}$,
+$\mathrm{MAE}=0.386\,\mathrm{m}$, and $r=0.119$; South Sierra has
+$R^2_{\mathrm{LOYO}}=-1.486$, $\mathrm{RMSE}=0.507\,\mathrm{m}$,
+$\mathrm{MAE}=0.427\,\mathrm{m}$, and $r=0.161$. In this run, the inner-LOYO ridge penalty
+selection chose $\lambda=10^{-4}$ for all outer held-out years and all three regions. This should
+be interpreted conservatively as a first ocean-mode-only baseline, not as evidence that Sierra SWE
+is well predicted by the current SST-mode predictor set alone. The time-series and scatter plots
+show that the predicted series does not track the observed interannual SWE fluctuations closely,
+and many years fall far from the one-to-one line, which is consistent with the negative LOYO
+$R^2$ values in all three regions.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/observed_vs_predicted_timeseries.pdf}
+\caption{Observed and LOYO-predicted April 1 SWE for the basin-based North, Central, and South
+Sierra targets in the first ocean-mode-only ridge baseline.}
+\label{fig:ocean_mode_only_ridge_timeseries}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/observed_vs_predicted_scatter.pdf}
+\caption{Observed-versus-predicted April 1 SWE scatter for the basin-based North, Central, and
+South Sierra targets in the first ocean-mode-only ridge baseline. The dashed line is the one-to-one
+reference line.}
+\label{fig:ocean_mode_only_ridge_scatter}
+\end{figure}
+
+
+\subsubsection{Ocean-Mode-Only PLS Predictability Test}
+\label{subsubsec:ocean_mode_only_pls_predictability_test}
+
+After the ridge-regression ocean-mode-only test, the next analysis model is partial least squares
+regression (PLS). The motivation for adding PLS is that the ocean-mode predictor columns are highly
+correlated across months and across related climate modes. Ridge regression shrinks coefficients
+but still fits the target directly from the original predictor columns. PLS instead constructs a
+small number of supervised latent components from the predictor matrix, so it is a supervised
+dimension-reduction method rather than an unsupervised EOF/PCA method.
+
+The scientific question remains the same as in the ridge experiment:
+\begin{quote}
+Using only ocean-side climate-mode predictors, how much April 1 Sierra SWE variability can be
+predicted under strict leave-one-water-year-out cross-validation?
+\end{quote}
+No December 30 SWE or other same-year observed SWE state is included in this experiment.
+
+The same predictor matrix is used as in the ridge experiment, with $n=37$ water years and $p=91$
+predictor columns built from Sep--Mar Pacific SST EOF-PC predictors, Sep--Mar Niño 3.4 indices,
+and Sep--Mar North Atlantic AMV/AMO EOF-PC predictors. The three basin-based Sierra SWE targets
+are modeled separately:
+\[
+Y_N(t)=\mathrm{SWE}_{N,\mathrm{Apr1}}(t),\qquad
+Y_C(t)=\mathrm{SWE}_{C,\mathrm{Apr1}}(t),\qquad
+Y_S(t)=\mathrm{SWE}_{S,\mathrm{Apr1}}(t).
+\]
+Thus, the PLS experiment fits three independent single-output PLS1 models,
+\[
+X(t,:) \rightarrow Y_N(t),\qquad
+X(t,:) \rightarrow Y_C(t),\qquad
+X(t,:) \rightarrow Y_S(t).
+\]
+
+\paragraph{PLS model definition.}
+For one Sierra target region $R\in\{N,C,S\}$, PLS constructs $K$ latent score vectors from the
+training-fold standardized predictor matrix and uses those supervised latent components to predict
+the training-fold standardized SWE target. In implementation, this experiment uses a standard
+PLS1 algorithm through \texttt{sklearn.cross\_decomposition.PLSRegression} with manual
+cross-validation-fold standardization, so the internal scaling option is disabled:
+\[
+\texttt{PLSRegression(n\_components=K, scale=False)}.
+\]
+Because the latent components are estimated from the covariance structure between predictors and
+target inside each fold, PLS differs from EOF/PCA-style unsupervised reduction and is potentially
+better suited to a small, collinear climate-mode predictor set.
+
+\paragraph{Outer leave-one-water-year-out cross-validation.}
+Prediction skill is evaluated using strict leave-one-water-year-out cross-validation (LOYO-CV). For
+each held-out water year $t_0$, the model is trained on the other 36 years and predicts only the
+held-out year. This is done separately for North, Central, and South Sierra, so the final
+diagnostic series for each region contains 37 out-of-sample predictions.
+
+\paragraph{Training-fold-only standardization.}
+For each outer LOYO split, predictor-column means and standard deviations are computed using only
+the 36 outer-training years, and the held-out year is standardized with those training-fold
+statistics. The same rule is applied to the target variable within each region. Therefore, the
+held-out year is never used to compute predictor scaling, target scaling, latent components,
+regression coefficients, or tuning choices.
+
+\paragraph{Inner cross-validation for the number of PLS components.}
+The main PLS tuning parameter is the number of latent components $K$. For each outer split, a
+small candidate set
+\[
+K\in\{1,2,3,4,5\}
+\]
+is tested using an inner leave-one-year-out loop within the 36 outer-training years. Within each
+inner split, predictor and target standardization are recomputed using only the 35 inner-training
+years. The selected component count is the one that minimizes the mean inner-fold validation mean
+squared error, with ties resolved conservatively in favor of the smaller $K$.
+
+\paragraph{Final outer-fold prediction and skill metrics.}
+After the optimal $K$ is selected inside one outer LOYO split, the final PLS model is refit on all
+36 standardized outer-training years and then used to predict the held-out year. The standardized
+prediction is transformed back to physical SWE units using the outer-training target mean and
+standard deviation. Repeating this across all 37 water years gives one out-of-sample prediction
+series per region. Skill is summarized using
+\[
+R^2_{\mathrm{LOYO},R},\qquad \mathrm{RMSE}_R,\qquad \mathrm{MAE}_R,\qquad r_R.
+\]
+
+Suggested output paths for this ocean-mode-only PLS experiment are:
+\begin{quote}
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/}
+\end{quote}
+with files such as:
+\begin{quote}
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/loyo_predictions.csv}\\
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/loyo_metrics.json}\\
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/selected_components_by_fold.csv}\\
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/pls_coefficients_by_fold.csv}\\
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/pls_loadings_weights_by_fold.nc}\\
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/observed_vs_predicted_timeseries.png}\\
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/run.log}
+\end{quote}
+
+\paragraph{Current basin-based LOYO PLS result.}
+The first basin-based ocean-mode-only LOYO PLS experiment has now been run with
+\path{scripts/run_ocean_mode_only_swe_pls.py}. The output folder is
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/}. The merged predictor table is
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/ocean_mode_predictors_wy1985_2021.csv},
+and the April 1 SWE target table is
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/sierra_apr1_swe_north_central_south_wy1985_2021.csv}.
+The LOYO metrics are stored in
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/loyo_metrics.json}; the foldwise
+selected component counts are stored in
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/selected_components_by_fold.csv}; the
+foldwise coefficients are stored in
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/pls_coefficients_by_fold.csv}; and
+the foldwise PLS weights and loadings are stored in
+\path{artifacts/swe_climate_mode_baseline/ocean_mode_only_pls/pls_loadings_weights_by_fold.nc}. The
+main diagnostic figures are \path{figures/ocean_mode_only_pls_observed_vs_predicted_timeseries.pdf},
+\path{figures/ocean_mode_only_pls_observed_vs_predicted_scatter.pdf}, and
+\path{figures/ocean_mode_only_pls_selected_components_by_fold.pdf}.
+
+Under strict LOYO validation with the basin-based North/Central/South SWE targets, the current
+ocean-mode-only PLS baseline improves on the ridge baseline but still does not yet show useful
+standalone out-of-sample April 1 SWE skill. North Sierra has
+$R^2_{\mathrm{LOYO}}=-0.371$, $\mathrm{RMSE}=0.249\,\mathrm{m}$,
+$\mathrm{MAE}=0.199\,\mathrm{m}$, and $r=-0.161$; Central Sierra has
+$R^2_{\mathrm{LOYO}}=-0.487$, $\mathrm{RMSE}=0.357\,\mathrm{m}$,
+$\mathrm{MAE}=0.283\,\mathrm{m}$, and $r=-0.241$; South Sierra has
+$R^2_{\mathrm{LOYO}}=-0.434$, $\mathrm{RMSE}=0.385\,\mathrm{m}$,
+$\mathrm{MAE}=0.315\,\mathrm{m}$, and $r=-0.025$. The inner-LOYO component selection favored a
+small latent space: North selected $K=1$ in 31 of 37 folds and $K=2$ in 6 folds; Central selected
+$K=1$ in 21 folds and $K=2$ in 16 folds; South selected $K=1$ in 22 folds, $K=2$ in 14 folds, and
+$K=4$ in 1 fold. The time-series and scatter plots show that the PLS predictions are somewhat less
+dispersed than the ridge predictions, but they still fail to track the observed interannual SWE
+fluctuations closely and remain close to the climatological mean in many years. This should
+therefore be interpreted conservatively as an improved but still weak ocean-mode-only baseline, not
+as evidence that the current SST-mode predictor family alone provides robust April 1 Sierra SWE
+predictability.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/ocean_mode_only_pls_observed_vs_predicted_timeseries.pdf}
+\caption{Observed and LOYO-predicted April 1 SWE for the basin-based North, Central, and South
+Sierra targets in the ocean-mode-only PLS baseline.}
+\label{fig:ocean_mode_only_pls_timeseries}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/ocean_mode_only_pls_observed_vs_predicted_scatter.pdf}
+\caption{Observed-versus-predicted April 1 SWE scatter for the basin-based North, Central, and
+South Sierra targets in the ocean-mode-only PLS baseline. The dashed line is the one-to-one
+reference line.}
+\label{fig:ocean_mode_only_pls_scatter}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.80\linewidth]{../figures/ocean_mode_only_pls_selected_components_by_fold.pdf}
+\caption{Selected number of latent PLS components for each outer LOYO fold in the ocean-mode-only
+PLS baseline. Most folds select only one or two components, indicating that the tuned model favors
+a very low-dimensional supervised representation of the predictor matrix.}
+\label{fig:ocean_mode_only_pls_components}
+\end{figure}
+
+
 
 \end{document}

@@ -25,6 +25,7 @@ experiments/foreswe_sierra_station/**/*.pkl
 # Python
 __pycache__/
 *.pyc
+.python_vendor/
 
 # Conda / env
 .env
