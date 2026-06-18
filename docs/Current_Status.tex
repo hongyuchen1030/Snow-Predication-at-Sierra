@@ -1522,13 +1522,6 @@ The AMV/AMO North Atlantic SST EOF-PC product has already been generated:
     \item Run log: \path{artifacts/swe_climate_mode_baseline/amv_amo/run.log}
 \end{itemize}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.92\linewidth]{../figures/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}
-\caption{North Atlantic AMV/AMO baseline EOF diagnostic for COBE2 SST over $0^\circ$--$70^\circ\mathrm{N}$ and $280^\circ\mathrm{E}$--$360^\circ\mathrm{E}$ in the $0..360$ longitude convention. The panels show EOF modes 1--6 retained for the AMV/AMO predictor-family baseline.}
-\label{fig:amv_amo_cobe2_north_atlantic_eofs_modes1to6}
-\end{figure}
-
 \paragraph{Clarification.}
 For EOF-based predictors, the machine-learning input columns are the PC time series, not the EOF
 maps. The EOF maps are used for physical interpretation. The COBE2 Pacific SST EOF-PC products are
@@ -1543,7 +1536,17 @@ AMV/AMO because AMV is the more neutral terminology, while AMO is the older ``os
 terminology. In this baseline, the actual machine-learning predictor columns are the North
 Atlantic SST PC time series, not the EOF maps. The EOF maps are retained only for physical
 interpretation. EOF sign is arbitrary, so the sign of AMV/AMO PC1--PC6 should not be interpreted
-without checking the EOF map and/or correlation with a reference AMV/AMO index.
+without checking the EOF map and/or correlation with a reference AMV/AMO index, the visulization of the 6 modes are in Figure~\ref{fig:amv_amo_cobe2_north_atlantic_eofs_modes1to6}
+
+
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\linewidth]{../figures/amv_amo_cobe2_north_atlantic_eofs_modes1to6.png}
+\caption{North Atlantic AMV/AMO baseline EOF diagnostic for COBE2 SST over $0^\circ$--$70^\circ\mathrm{N}$ and $280^\circ\mathrm{E}$--$360^\circ\mathrm{E}$ in the $0..360$ longitude convention. The panels show EOF modes 1--6 retained for the AMV/AMO predictor-family baseline.}
+\label{fig:amv_amo_cobe2_north_atlantic_eofs_modes1to6}
+\end{figure}
+
 
 \subsubsection{Ocean-Mode-Only Predictability Test}
 \label{subsubsec:ocean_mode_only_predictability_test}
