@@ -54,12 +54,25 @@ LAG_SPECS = [
     ("Feb", 0, 2),
     ("Mar", 0, 3),
 ]
-K_MAX = 6
+DEFAULT_K_MAX = 6
 DELTA_R2_MIN = 0.02
 CORR_MIN = 0.2
 EXPECTED_LAG_NAMES = [spec[0] for spec in LAG_SPECS]
 EXPECTED_MONTH_COUNT = len(WATER_YEARS) * len(LAG_SPECS)
 ERA5_VARIABLE = "SSTK"
+
+
+def read_positive_int_env(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    value = int(raw)
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}.")
+    return value
+
+
+K_MAX = read_positive_int_env("SIERRA_SWE_LOD_K_MAX", DEFAULT_K_MAX)
 
 
 def ensure_runtime_on_compute_node() -> None:
@@ -574,6 +587,7 @@ def write_summary_markdown(
         "## Skill",
         "",
         f"- Water years: `{WATER_YEAR_START}--{WATER_YEAR_END}` ({skill_summary['fold_count']} folds)",
+        f"- LOYO run mode cap (`K_max`): `{skill_summary['k_max']}`",
         f"- ERA5-only LOYO R2: `{skill_summary['metrics']['r2_loyo']:.4f}`",
         f"- LOYO RMSE: `{skill_summary['metrics']['rmse_m']:.6f}` m",
         f"- LOYO MAE: `{skill_summary['metrics']['mae_m']:.6f}` m",
@@ -613,6 +627,7 @@ def main() -> None:
 
     print("starting ERA5-only LOYO LOD", flush=True)
     print(f"output_root={OUTPUT_ROOT}", flush=True)
+    print(f"k_max={K_MAX}", flush=True)
     print("loading April 1 Sierra SWE target...", flush=True)
     target_anom_m, target_std_global = load_target()
     print(f"loaded target arrays shape={target_anom_m.shape}", flush=True)

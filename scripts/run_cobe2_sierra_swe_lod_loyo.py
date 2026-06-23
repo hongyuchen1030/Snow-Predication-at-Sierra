@@ -55,9 +55,22 @@ LAG_SPECS = [
     ("Feb", 0, 2),
     ("Mar", 0, 3),
 ]
-K_MAX = 6
+DEFAULT_K_MAX = 6
 DELTA_R2_MIN = 0.02
 CORR_MIN = 0.2
+
+
+def read_positive_int_env(name: str, default: int) -> int:
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    value = int(raw)
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}.")
+    return value
+
+
+K_MAX = read_positive_int_env("SIERRA_SWE_LOD_K_MAX", DEFAULT_K_MAX)
 
 
 def ensure_runtime_on_compute_node() -> None:
@@ -491,6 +504,7 @@ def write_summary_markdown(
         "## Skill",
         "",
         f"- Water years: `{WATER_YEAR_START}--{WATER_YEAR_END}` ({len(observed)} folds)",
+        f"- LOYO run mode cap (`K_max`): `{skill_summary['k_max']}`",
         f"- In-sample 6-mode cumulative R2 from the existing COBE2 diagnostic: `{skill_summary['in_sample_reference']['full_run_cumulative_r2_mode6']:.4f}`",
         f"- Final LOYO test R2: `{skill_summary['metrics']['r2_loyo']:.4f}`",
         f"- LOYO RMSE: `{skill_summary['metrics']['rmse_m']:.6f}` m",
@@ -502,7 +516,7 @@ def write_summary_markdown(
         "## Does High In-sample R2 Survive?",
         "",
         f"- Verdict: **{skill_summary['interpretation']['generalization_verdict']}**",
-        f"- The LOYO test R2 is `{skill_summary['metrics']['r2_loyo']:.4f}`, compared with in-sample `0.7863` from the full COBE2 fit.",
+        f"- The LOYO test R2 is `{skill_summary['metrics']['r2_loyo']:.4f}`, compared with in-sample `{skill_summary['in_sample_reference']['full_run_cumulative_r2_mode6']:.4f}` from the full COBE2 6-mode fit.",
         "",
         "## Mode Stability",
         "",
@@ -545,6 +559,7 @@ def main() -> None:
 
     print("starting COBE2-only LOYO LOD", flush=True)
     print(f"output_root={OUTPUT_ROOT}", flush=True)
+    print(f"k_max={K_MAX}", flush=True)
     print("loading April 1 Sierra SWE target...", flush=True)
     target_anom_m, target_std_global = load_target()
     print(f"loaded target arrays shape={target_anom_m.shape}", flush=True)

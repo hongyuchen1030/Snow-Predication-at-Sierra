@@ -1,5 +1,5 @@
 # Fdb version 4
-["pdflatex"] 1781673036.67303 "Current_Status.tex" "Current_Status.pdf" "Current_Status" 1781673037.48023 0
+["pdflatex"] 1781799835.10765 "Current_Status.tex" "Current_Status.pdf" "Current_Status" 1781799836.17178 0
   "../figures/amv_amo_cobe2_north_atlantic_eofs_modes1to6.pdf" 1781670928.78194 378425 9ae3d7d2a2f135ab6a18be12a42895e1 ""
   "../figures/basin_assignment_test_wy2021.pdf" 1781670928.58598 590226 2549e6f758c48ad0ecb4106a88e9ac11 ""
   "../figures/cobe2_eof1_and_wusd3_d01_pacific_coverage.pdf" 1781670928.17431 372666 d26b1d0d57f8e31bf662dd7f977c737d ""
@@ -8,6 +8,7 @@
   "../figures/cobe2_pacific_sierra_t2m_level2_pc1to6_maps.pdf" 1781670927.88873 481263 4e2242ba4cf967277d37f6faac84351f ""
   "../figures/cobe2_pacific_sierra_t2m_level2_pc1to6_monthly_r2_maps.pdf" 1781670928.06958 576896 a8a953c7f506ba0ad6fb6b5cbaf2ac81 ""
   "../figures/cobe2_sharedregion_sierra_t2m_level2_pc1to6_monthly_r2_maps.pdf" 1781670928.38148 580192 3960505bad8b07f98ced2d972f853e73 ""
+  "../figures/cobe2_vs_era5_lod_modes_1to6_heatmaps.pdf" 1781206316 25382286 9c874a15d6bdb9537a729535e325eb68 ""
   "../figures/observed_vs_predicted_scatter.pdf" 1781672106.86723 248665 4edd386308107da379fc88e7ca140286 ""
   "../figures/observed_vs_predicted_timeseries.pdf" 1781672106.76707 562382 819ea240d3ca72bee3e48e9166dea340 ""
   "../figures/ocean_mode_only_pls_observed_vs_predicted_scatter.pdf" 1781672946.4466 242495 d54d66304f359f46b580aea3e5c3e396 ""
@@ -126,9 +127,9 @@
   "/global/common/software/nersc9/texlive/2024-17c650b50c05ee823c6093081103ed0ab76a21df/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1734640350 5485877 d30eb5d21ea52e3459451af1793c000d ""
   "/global/common/software/nersc9/texlive/2024-17c650b50c05ee823c6093081103ed0ab76a21df/texmf-var/web2c/pdftex/pdflatex.fmt" 1734640490 3344772 0053dfe835ece1b34f747c25fff617ba ""
   "/global/common/software/nersc9/texlive/2024-17c650b50c05ee823c6093081103ed0ab76a21df/texmf.cnf" 1734640345.86901 496 01ab80fa0036a81d2df86fb0ac70c709 ""
-  "Current_Status.aux" 1781673037.35799 28903 e5fb6588ed68777207c5244f09479b85 "pdflatex"
-  "Current_Status.out" 1781673037.35941 4670 c464ecd846aa47f20696149e10186571 "pdflatex"
-  "Current_Status.tex" 1781673031.74398 86898 e23ba0a3c5a76500ae7e1f9300cf89ae ""
+  "Current_Status.aux" 1781799836.03464 30324 5eaef52d4cba6f0fce62444e28bbbf6c "pdflatex"
+  "Current_Status.out" 1781799836.03646 4670 c464ecd846aa47f20696149e10186571 "pdflatex"
+  "Current_Status.tex" 1781799821.57079 88033 71e090ebaf449334848c9675d95f349e ""
   (generated)
   "Current_Status.aux"
   "Current_Status.log"

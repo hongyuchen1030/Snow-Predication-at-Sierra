@@ -220,6 +220,11 @@ INPUT /global/common/software/nersc9/texlive/2024-17c650b50c05ee823c6093081103ed
 INPUT /global/common/software/nersc9/texlive/2024-17c650b50c05ee823c6093081103ed0ab76a21df/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm
 INPUT /global/common/software/nersc9/texlive/2024-17c650b50c05ee823c6093081103ed0ab76a21df/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm5.tfm
 INPUT /global/common/software/nersc9/texlive/2024-17c650b50c05ee823c6093081103ed0ab76a21df/texmf-dist/fonts/tfm/public/cm/cmti10.tfm
+INPUT ../figures/cobe2_vs_era5_lod_modes_1to6_heatmaps.pdf
+INPUT ../figures/cobe2_vs_era5_lod_modes_1to6_heatmaps.pdf
+INPUT ../figures/cobe2_vs_era5_lod_modes_1to6_heatmaps.pdf
+INPUT ../figures/cobe2_vs_era5_lod_modes_1to6_heatmaps.pdf
+INPUT ../figures/cobe2_vs_era5_lod_modes_1to6_heatmaps.pdf
 INPUT ../figures/basin_assignment_test_wy2021.pdf
 INPUT ../figures/basin_assignment_test_wy2021.pdf
 INPUT ../figures/basin_assignment_test_wy2021.pdf
