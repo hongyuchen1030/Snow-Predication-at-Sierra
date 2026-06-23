@@ -2162,17 +2162,26 @@ a very low-dimensional supervised representation of the predictor matrix.}
 \subsection{Mixing LOD-Selected SSTs with Large-Scale SST Modes}
 
 We use the first two full-37-year LOD-selected SST columns as reference predictors, denoted
-(Z_1) and (Z_2). These are the full-sample selected mode-1 and mode-2 SST time series. We then
+\(Z_1\) and \(Z_2\). These are the full-sample selected mode-1 and mode-2 SST time series. We then
 tested whether their apparent skill is stable under stricter settings and whether large-scale SST
 modes add missing information.
 
+
 \begin{itemize}
-\item \textbf{Fixed (Z_1+Z_2) oracle test.}
-Using the full-37 selected (Z_1) and (Z_2) as fixed predictors gives moderate LOYO skill:
-(r\approx 0.55), (R^2\approx 0.30), RMSE (\approx 0.0265,\mathrm{m}), and sign accuracy
-(\approx 0.78). This shows that the two full-sample LOD-selected SST columns contain useful
+\item \textbf{Fixed \(Z_1+Z_2\) oracle test.}
+Using the full-37 selected \(Z_1\) and \(Z_2\) as fixed predictors gives moderate LOYO skill:
+\(r\approx 0.55\), \(R^2\approx 0.30\), RMSE \(\approx 0.0265\,\mathrm{m}\), and sign accuracy
+\(\approx 0.78\). This shows that the two full-sample LOD-selected SST columns contain useful
 SWE-related information, but this is an oracle-style test because the selected locations are
 known from all 37 years.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/exact_Z1_Z2_residual_timeline.pdf}
+\caption{Observed and predicted April 1 SWE anomalies for the fixed full-sample \(Z_1+Z_2\)
+oracle-style LOYO test.}
+\label{fig:exact_z1_z2_residual_timeline}
+\end{figure}
 
 \item \textbf{Nested \(M_1+M_2\) LOD test.}
 In the strict nested LOYO test, LOD re-selects modes inside each 36-year training fold. This
@@ -2181,11 +2190,29 @@ oracle model: nested \(M_1+M_2\) fails most strongly in 2011, 2015, 2006, 1993, 
 whereas fixed \(Z_1+Z_2\) fails most strongly in 1993, 2012, 2005, 2021, and 2006. Only 1993
 and 2006 overlap. This indicates that nested LOD failure is not just the same residual problem;
 feature-selection instability is also important.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/nested_lod_m1_m2_vs_oracle_timeseries.pdf}
+\caption{Observed SWE anomalies compared against the strict nested \(M_1+M_2\) LOD LOYO
+prediction and the fixed full-sample \(Z_1+Z_2\) oracle-style prediction.}
+\label{fig:nested_lod_m1_m2_vs_oracle_timeseries}
+\end{figure}
+
 \item \textbf{Patch-average test around \(Z_1,Z_2\).}
 We replaced the exact grid-cell predictors with \(5^\circ\), \(10^\circ\), and \(15^\circ\)
 patch averages around the \(Z_1,Z_2\) locations. Patch averaging did not improve prediction.
 Skill decreased as patch size increased. Therefore, the useful \(Z_1,Z_2\) signal is not a
 simple broad regional box-average SST signal.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/full37_patch_observed_vs_predicted.pdf}
+\caption{Observed-versus-predicted April 1 SWE anomalies for the patch-average test around the
+fixed \(Z_1,Z_2\) predictor locations.}
+\label{fig:full37_patch_observed_vs_predicted}
+\end{figure}
+
 \item \textbf{\(Z_1+Z_2\) residual analysis.}
 The residual
 \[
