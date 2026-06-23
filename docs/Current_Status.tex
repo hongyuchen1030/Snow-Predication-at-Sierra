@@ -2159,6 +2159,63 @@ a very low-dimensional supervised representation of the predictor matrix.}
 \label{fig:ocean_mode_only_pls_components}
 \end{figure}
 
+\subsection{Mixing LOD-Selected SSTs with Large-Scale SST Modes}
 
+We use the first two full-37-year LOD-selected SST columns as reference predictors, denoted
+(Z_1) and (Z_2). These are the full-sample selected mode-1 and mode-2 SST time series. We then
+tested whether their apparent skill is stable under stricter settings and whether large-scale SST
+modes add missing information.
+
+\begin{itemize}
+\item \textbf{Fixed (Z_1+Z_2) oracle test.}
+Using the full-37 selected (Z_1) and (Z_2) as fixed predictors gives moderate LOYO skill:
+(r\approx 0.55), (R^2\approx 0.30), RMSE (\approx 0.0265,\mathrm{m}), and sign accuracy
+(\approx 0.78). This shows that the two full-sample LOD-selected SST columns contain useful
+SWE-related information, but this is an oracle-style test because the selected locations are
+known from all 37 years.
+
+\item \textbf{Nested \(M_1+M_2\) LOD test.}
+In the strict nested LOYO test, LOD re-selects modes inside each 36-year training fold. This
+does not retain the fixed \(Z_1+Z_2\) skill. The largest-error years also differ from the fixed
+oracle model: nested \(M_1+M_2\) fails most strongly in 2011, 2015, 2006, 1993, and 2019,
+whereas fixed \(Z_1+Z_2\) fails most strongly in 1993, 2012, 2005, 2021, and 2006. Only 1993
+and 2006 overlap. This indicates that nested LOD failure is not just the same residual problem;
+feature-selection instability is also important.
+\item \textbf{Patch-average test around \(Z_1,Z_2\).}
+We replaced the exact grid-cell predictors with \(5^\circ\), \(10^\circ\), and \(15^\circ\)
+patch averages around the \(Z_1,Z_2\) locations. Patch averaging did not improve prediction.
+Skill decreased as patch size increased. Therefore, the useful \(Z_1,Z_2\) signal is not a
+simple broad regional box-average SST signal.
+\item \textbf{\(Z_1+Z_2\) residual analysis.}
+The residual
+\[
+r(y)=SWE_{\mathrm{obs}}(y)-\widehat{SWE}_{Z_1+Z_2}(y)
+\]
+is structured, not random. The fixed \(Z_1+Z_2\) model underpredicts several wet years and
+overpredicts several dry years. The main residual years are 1993, 2005, 2006, 2012, and 2021.
+This suggests that \(Z_1+Z_2\) captures part of the SST-related SWE signal but misses some
+extreme wet/dry behavior.
+\item \textbf{Residual screening against large-scale SST modes.}
+We screened the \(Z_1+Z_2\) residuals against Pacific PC1--PC6, Ni\~no 3.4, and AMV/AMO
+PC1--PC6 from September through March. AMV/AMO showed the strongest residual association,
+Pacific PCs were weaker, and Ni\~no 3.4 was weakest. These were screening correlations only,
+not predictive tests.
+\item \textbf{Adding AMV/AMO PCs to ridge LOYO.}
+We added AMV/AMO PC2--PC4 from September through March to the \(Z_1+Z_2\) ridge model. This
+did not improve strict LOYO prediction. The combined model performed worse than the
+\(Z_1+Z_2\) ridge baseline.
+\item \textbf{Adding Pacific PCs and Ni\~no 3.4 to ridge LOYO.}
+We also tested \(Z_1+Z_2+\) Pacific PC1--PC6, \(Z_1+Z_2+\) Ni\~no 3.4, and
+\(Z_1+Z_2+\) Pacific PC1--PC6 \(+\) Ni\~no 3.4. None improved over the \(Z_1+Z_2\)
+ridge baseline. Pacific PCs degraded strongly; Ni\~no 3.4 was less damaging but still did not
+improve prediction.
+\item \textbf{Current conclusion.}
+The fixed full-sample \(Z_1+Z_2\) pair is the best SST-only linear predictor found so far.
+However, its skill depends on knowing the full-sample selected locations. Nested LOD does not
+reliably recover the same skill, patch averaging does not stabilize it, and adding standard
+large-scale SST modes does not improve strict LOYO prediction. Thus, the current linear
+SST-only branch has reached a natural stopping point.
+
+\end{itemize}
 
 \end{document}
