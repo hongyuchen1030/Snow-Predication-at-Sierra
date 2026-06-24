@@ -8,6 +8,7 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage{cleveref}
 
 \hypersetup{
   colorlinks=true,
@@ -2173,7 +2174,7 @@ Using the full-37 selected \(Z_1\) and \(Z_2\) as fixed predictors gives moderat
 \(r\approx 0.55\), \(R^2\approx 0.30\), RMSE \(\approx 0.0265\,\mathrm{m}\), and sign accuracy
 \(\approx 0.78\). This shows that the two full-sample LOD-selected SST columns contain useful
 SWE-related information, but this is an oracle-style test because the selected locations are
-known from all 37 years.
+known from all 37 years. The result is shown in \cref{fig:exact_z1_z2_residual_timeline}.
 
 \begin{figure}[h]
 \centering
@@ -2189,7 +2190,8 @@ does not retain the fixed \(Z_1+Z_2\) skill. The largest-error years also differ
 oracle model: nested \(M_1+M_2\) fails most strongly in 2011, 2015, 2006, 1993, and 2019,
 whereas fixed \(Z_1+Z_2\) fails most strongly in 1993, 2012, 2005, 2021, and 2006. Only 1993
 and 2006 overlap. This indicates that nested LOD failure is not just the same residual problem;
-feature-selection instability is also important.
+feature-selection instability is also important. The result is shown in
+\cref{fig:nested_lod_m1_m2_vs_oracle_timeseries}.
 
 \begin{figure}[h]
 \centering
@@ -2203,7 +2205,8 @@ prediction and the fixed full-sample \(Z_1+Z_2\) oracle-style prediction.}
 We replaced the exact grid-cell predictors with \(5^\circ\), \(10^\circ\), and \(15^\circ\)
 patch averages around the \(Z_1,Z_2\) locations. Patch averaging did not improve prediction.
 Skill decreased as patch size increased. Therefore, the useful \(Z_1,Z_2\) signal is not a
-simple broad regional box-average SST signal.
+simple broad regional box-average SST signal. The result is shown in
+\cref{fig:full37_patch_observed_vs_predicted}.
 
 \begin{figure}[h]
 \centering
@@ -2227,22 +2230,68 @@ We screened the \(Z_1+Z_2\) residuals against Pacific PC1--PC6, Ni\~no 3.4, and 
 PC1--PC6 from September through March. AMV/AMO showed the strongest residual association,
 Pacific PCs were weaker, and Ni\~no 3.4 was weakest. These were screening correlations only,
 not predictive tests.
-\item \textbf{Adding AMV/AMO PCs to ridge LOYO.}
-We added AMV/AMO PC2--PC4 from September through March to the \(Z_1+Z_2\) ridge model. This
-did not improve strict LOYO prediction. The combined model performed worse than the
-\(Z_1+Z_2\) ridge baseline.
+
+\item \textbf{Adding AMV/AMO PCs to \(Z_1+Z_2\).}
+We added AMV/AMO PCs from September through March to the \(Z_1+Z_2\) ridge model. Although the
+AMV/AMO-only model has useful standalone skill, the combined
+\(Z_1+Z_2+\) AMV/AMO model performs worse than either component model. Thus, the two predictor
+blocks are not simply additive under the current ridge LOYO setup. This may reflect collinearity,
+foldwise coefficient instability, or the small-sample penalty from combining two predictor
+families. The time-series comparison is shown in \cref{fig:focused_z1z2_amv_timeseries}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/focused_z1z2_amv_timeseries.pdf}
+\caption{Strict LOYO time-series comparison for the fixed \(Z_1+Z_2\) model, the AMV/AMO
+PC1--PC6-only model, and the combined \(Z_1+Z_2+\) AMV/AMO PC1--PC6 model.}
+\label{fig:focused_z1z2_amv_timeseries}
+\end{figure}
+
 \item \textbf{Adding Pacific PCs and Ni\~no 3.4 to ridge LOYO.}
 We also tested \(Z_1+Z_2+\) Pacific PC1--PC6, \(Z_1+Z_2+\) Ni\~no 3.4, and
 \(Z_1+Z_2+\) Pacific PC1--PC6 \(+\) Ni\~no 3.4. None improved over the \(Z_1+Z_2\)
 ridge baseline. Pacific PCs degraded strongly; Ni\~no 3.4 was less damaging but still did not
 improve prediction.
-\item \textbf{Current conclusion.}
-The fixed full-sample \(Z_1+Z_2\) pair is the best SST-only linear predictor found so far.
-However, its skill depends on knowing the full-sample selected locations. Nested LOD does not
-reliably recover the same skill, patch averaging does not stabilize it, and adding standard
-large-scale SST modes does not improve strict LOYO prediction. Thus, the current linear
-SST-only branch has reached a natural stopping point.
 
+\item \textbf{Oracle-column support years.}
+The full-sample LOD columns are not supported uniformly by all years. Leave-one-year influence
+tests show that the clearest support years for keeping \(Z_1\) competitive are
+\(2012, 2005, 2006, 2017,\) and \(1994\), while the clearest support years for \(Z_2\) are
+\(2017, 1994, 2011, 2019,\) and \(1992\). Their union,
+\(1992, 1994, 2005, 2006, 2011, 2012, 2017,\) and \(2019\),
+overlaps substantially with the worst nested \(M_1+M_2\) prediction years: it captures 3 of the
+top 5 worst years and 6 of the top 10 worst years. This means several bad nested-LOD years are not
+only hard prediction years; they are also years whose removal changes the selected SST columns.
+This overlap is illustrated again in \cref{fig:nested_lod_m1_m2_vs_oracle_timeseries_support}.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/nested_lod_m1_m2_vs_oracle_timeseries.pdf}
+\caption{Observed SWE anomalies compared against the strict nested \(M_1+M_2\) LOD LOYO
+prediction and the fixed full-sample \(Z_1+Z_2\) oracle-style prediction, shown here to highlight
+the overlap between the worst nested years and the oracle-column support years.}
+\label{fig:nested_lod_m1_m2_vs_oracle_timeseries_support}
+\end{figure}
+
+\item \textbf{Near-miss versus wrong-column LOD failures.}
+The exact-match criterion is too strict because some non-exact nested selections remain in the
+same month and near the oracle location. Mode 1 has 17 exact matches and 9 near misses, so many of
+its non-exact selections are still close to \(Z_1\). Mode 2 is less stable: it has 18 exact matches
+but 15 true wrong-column selections. The worst nested \(M_1+M_2\) years are concentrated in true
+wrong-column cases. In particular, 2011, 2015, 2006, 1993, and 2019 all involve a true wrong or
+non-acceptable selection. Therefore, nested LOD does not fail merely because it misses the exact
+grid cell; it fails mainly when the selected column jumps to a different month and far-away region.
 \end{itemize}
+
+As a final closure test for the SST-only linear branch, we compared the fixed \(Z_1+Z_2\) LOD
+reference model against full large-scale SST predictor blocks and their combinations using the
+same strict LOYO ridge protocol.
+
+\input{../artifacts/cobe2_sierra_swe_lod_setup/final_sst_only_linear_closure_table/final_sst_only_closure_table.tex}
+
+The fixed \(Z_1+Z_2\) model remains the best low-dimensional fixed-LOD reference and ties for the
+best sign accuracy, but AMV/AMO PC1--PC6 alone is strongest by \(r\), \(R^2\), RMSE, and MAE.
+Adding Pacific PCs, Ni\~no 3.4, or AMV/AMO PCs to \(Z_1+Z_2\) does not improve the fixed
+\(Z_1+Z_2\) baseline.
 
 \end{document}
