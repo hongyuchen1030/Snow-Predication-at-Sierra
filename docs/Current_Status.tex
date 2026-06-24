@@ -2237,7 +2237,8 @@ AMV/AMO-only model has useful standalone skill, the combined
 \(Z_1+Z_2+\) AMV/AMO model performs worse than either component model. Thus, the two predictor
 blocks are not simply additive under the current ridge LOYO setup. This may reflect collinearity,
 foldwise coefficient instability, or the small-sample penalty from combining two predictor
-families. The time-series comparison is shown in \cref{fig:focused_z1z2_amv_timeseries}.
+families. The time-series comparison is shown in \cref{fig:focused_z1z2_amv_timeseries}, and the
+observed-versus-predicted scatter comparison is shown in \cref{fig:focused_z1z2_amv_scatter}.
 
 \begin{figure}[h]
 \centering
@@ -2245,6 +2246,14 @@ families. The time-series comparison is shown in \cref{fig:focused_z1z2_amv_time
 \caption{Strict LOYO time-series comparison for the fixed \(Z_1+Z_2\) model, the AMV/AMO
 PC1--PC6-only model, and the combined \(Z_1+Z_2+\) AMV/AMO PC1--PC6 model.}
 \label{fig:focused_z1z2_amv_timeseries}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\linewidth]{../figures/focused_z1z2_amv_scatter.pdf}
+\caption{Strict LOYO observed-versus-predicted scatter comparison for the fixed \(Z_1+Z_2\)
+model, the AMV/AMO PC1--PC6-only model, and the combined \(Z_1+Z_2+\) AMV/AMO PC1--PC6 model.}
+\label{fig:focused_z1z2_amv_scatter}
 \end{figure}
 
 \item \textbf{Adding Pacific PCs and Ni\~no 3.4 to ridge LOYO.}
@@ -2281,6 +2290,45 @@ but 15 true wrong-column selections. The worst nested \(M_1+M_2\) years are conc
 wrong-column cases. In particular, 2011, 2015, 2006, 1993, and 2019 all involve a true wrong or
 non-acceptable selection. Therefore, nested LOD does not fail merely because it misses the exact
 grid cell; it fails mainly when the selected column jumps to a different month and far-away region.
+
+
+\item \textbf{Reduced AMV/AMO core versus full AMV/AMO block.}
+The AMV/AMO-only ridge experiments show two layers of signal. A stable four-feature starting core,
+\[
+\{\mathrm{AMV\_PC4\_Sep},\ \mathrm{AMV\_PC5\_Feb},\ \mathrm{AMV\_PC2\_Feb},\
+\mathrm{AMV\_PC4\_Nov}\},
+\]
+captures a compact directional component. We then added remaining AMV/AMO PC-month predictors
+one at a time and stopped when two consecutive additions failed to give a meaningful LOYO gain.
+The only useful additional predictor was \(\mathrm{AMV\_PC5\_Mar}\), giving the reduced five-feature
+AMV/AMO core
+\[
+\{\mathrm{AMV\_PC4\_Sep},\ \mathrm{AMV\_PC5\_Feb},\ \mathrm{AMV\_PC2\_Feb},\
+\mathrm{AMV\_PC4\_Nov},\ \mathrm{AMV\_PC5\_Mar}\}.
+\]
+This K5 reduced core improves over the K4 starting core, reaching \(R^2=0.300\), RMSE
+\(=0.02653\,\mathrm{m}\), and sign accuracy \(=0.757\). The full AMV/AMO PC1--PC6
+September--March ridge model still gives slightly better amplitude metrics
+(\(R^2=0.339\), RMSE \(=0.02579\,\mathrm{m}\)), but lower sign accuracy (\(0.649\)).
+Thus, most of the stable low-dimensional AMV/AMO signal is captured by the five-feature reduced
+core, while the remaining amplitude gain in the full model is distributed across many weaker
+PC-month predictors. The observed-versus-predicted time series is shown in
+\cref{fig:amv_amo_reduced_core_observed_vs_predicted}, and the corresponding scatter comparison is
+shown in \cref{fig:amv_amo_reduced_core_scatter}.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.96\linewidth]{../figures/amv_amo_reduced_core_observed_vs_predicted.pdf}
+\caption{Observed April 1 Sierra SWE anomalies compared against the K4 starting AMV/AMO core, the
+K5 reduced AMV/AMO core, and the full 42-feature AMV/AMO ridge model under strict LOYO evaluation.}
+\label{fig:amv_amo_reduced_core_observed_vs_predicted}
+\end{figure}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.92\linewidth]{../figures/amv_amo_reduced_core_scatter.pdf}
+\caption{Observed-versus-predicted scatter comparison for the K4 starting AMV/AMO core, the K5
+reduced AMV/AMO core, and the full 42-feature AMV/AMO ridge model.}
+\label{fig:amv_amo_reduced_core_scatter}
+\end{figure}
 \end{itemize}
 
 As a final closure test for the SST-only linear branch, we compared the fixed \(Z_1+Z_2\) LOD
