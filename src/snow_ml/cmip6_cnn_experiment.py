@@ -38,7 +38,7 @@ class ExperimentConfig:
     output_dir: str
     split_json_path: str | None = None
     split_manifest_path: str | None = None
-    historical_s0_batch_order_audit_path: str | None = None
+    historical_batch_order_audit_path: str | None = None
 
 
 def architecture_uses_auxiliary(architecture: str) -> bool:
@@ -179,8 +179,9 @@ def _batch_order_digest(batches: list[list[int]]) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def build_historical_s0_batch_orders(
+def build_historical_batch_orders(
     *,
+    architecture: str,
     audit_path: Path,
     train_source_indices: list[int],
     val_source_indices: list[int],
@@ -188,21 +189,21 @@ def build_historical_s0_batch_orders(
     max_epochs: int,
     rng_state_after_model_init: torch.Tensor,
 ) -> tuple[list[list[list[int]]], dict[str, Any]]:
-    """Generate the old S0 shuffle schedule and verify its recorded first epochs."""
+    """Generate and verify an architecture's original shuffle schedule."""
     audit = load_json(audit_path)
-    recorded = audit["architectures"]["S0_static_cnn_swe_only"]["original"]
+    recorded = audit["architectures"][architecture]["original"]
     if int(audit["seed"]) != 20260813:
-        raise ValueError(f"Unexpected S0 audit seed: {audit['seed']}")
+        raise ValueError(f"Unexpected historical-replay audit seed: {audit['seed']}")
     if int(audit["batch_size"]) != batch_size:
         raise ValueError(f"Audit batch size {audit['batch_size']} does not match config batch size {batch_size}")
     if int(audit["train_row_count"]) != len(train_source_indices):
-        raise ValueError("Audit train-row count does not match the current S0 split")
+        raise ValueError("Audit train-row count does not match the current split")
     if int(audit["val_row_count"]) != len(val_source_indices):
-        raise ValueError("Audit validation-row count does not match the current S0 split")
+        raise ValueError("Audit validation-row count does not match the current split")
 
     source_to_dataset_position = {source_index: position for position, source_index in enumerate(train_source_indices)}
     if len(source_to_dataset_position) != len(train_source_indices):
-        raise ValueError("Current S0 train split contains duplicate source indices")
+        raise ValueError("Current train split contains duplicate source indices")
 
     # RandomSampler(generator=None) first draws a seed from the global CPU RNG,
     # then uses a local generator. Preserve that exact historical path in a fork.
@@ -239,7 +240,7 @@ def build_historical_s0_batch_orders(
     generated_digests = [_batch_order_digest(source_batches_by_epoch[index]) for index in range(verification_epochs)]
     if recorded_digests != generated_digests:
         raise RuntimeError(
-            "Generated S0 batches do not match the recorded original audit for epochs "
+            "Generated batches do not match the recorded original audit for epochs "
             f"1-{verification_epochs}: recorded={recorded_digests} generated={generated_digests}"
         )
 
@@ -247,8 +248,9 @@ def build_historical_s0_batch_orders(
     for epoch_batches in recorded:
         for batch in epoch_batches:
             if any(source_index not in source_to_dataset_position for source_index in batch):
-                raise ValueError("Audit includes a source index absent from the current S0 train split")
+                raise ValueError("Audit includes a source index absent from the current train split")
     return position_batches_by_epoch, {
+        "architecture": architecture,
         "audit_path": str(audit_path),
         "recorded_epoch_count": len(recorded),
         "verified_epoch_count": verification_epochs,
@@ -1994,29 +1996,35 @@ def train_experiment(config: ExperimentConfig) -> dict[str, Any]:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = build_model(config.architecture, in_channels_per_month=physical_data.shape[2] * 2)
     model.to(device)
-    historical_s0_batch_sampler: HistoricalBatchOrderSampler | None = None
-    historical_s0_batch_verification: dict[str, Any] | None = None
+    historical_batch_sampler: HistoricalBatchOrderSampler | None = None
+    historical_batch_verification: dict[str, Any] | None = None
     historical_train_loader: DataLoader[tuple[torch.Tensor, torch.Tensor, list[dict[str, Any]]]] | None = None
-    if config.historical_s0_batch_order_audit_path is not None:
-        if config.architecture != "S0_static_cnn_swe_only":
-            raise ValueError("Historical batch-order replay is supported only for S0_static_cnn_swe_only")
-        position_batches_by_epoch, historical_s0_batch_verification = build_historical_s0_batch_orders(
-            audit_path=Path(config.historical_s0_batch_order_audit_path),
+    if config.historical_batch_order_audit_path is not None:
+        if config.architecture not in {
+            "S0_static_cnn_swe_only",
+            "S1_static_latent_self_attention",
+            "S2_static_swe_token",
+            "S3_static_residual_gated_attention",
+        }:
+            raise ValueError("Historical batch-order replay is supported only for S0-S3")
+        position_batches_by_epoch, historical_batch_verification = build_historical_batch_orders(
+            architecture=config.architecture,
+            audit_path=Path(config.historical_batch_order_audit_path),
             train_source_indices=split["train"],
             val_source_indices=split["val"],
             batch_size=config.batch_size,
             max_epochs=config.max_epochs,
             rng_state_after_model_init=torch.get_rng_state(),
         )
-        historical_s0_batch_sampler = HistoricalBatchOrderSampler(position_batches_by_epoch)
+        historical_batch_sampler = HistoricalBatchOrderSampler(position_batches_by_epoch)
         historical_train_loader = DataLoader(
             train_dataset,
-            batch_sampler=historical_s0_batch_sampler,
+            batch_sampler=historical_batch_sampler,
             num_workers=config.num_workers,
             pin_memory=True,
             collate_fn=collate_with_metadata,
         )
-        write_json(output_dir / "historical_s0_batch_order_verification.json", historical_s0_batch_verification)
+        write_json(output_dir / "historical_batch_order_verification.json", historical_batch_verification)
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate, weight_decay=config.weight_decay)
     scaler = torch.cuda.amp.GradScaler(enabled=config.amp and device.type == "cuda")
     parameter_count = count_parameters(model)
@@ -2035,8 +2043,8 @@ def train_experiment(config: ExperimentConfig) -> dict[str, Any]:
         epoch_start = time.time()
         if device.type == "cuda":
             torch.cuda.reset_peak_memory_stats(device)
-        if historical_s0_batch_sampler is not None:
-            historical_s0_batch_sampler.set_epoch(epoch)
+        if historical_batch_sampler is not None:
+            historical_batch_sampler.set_epoch(epoch)
         optimization_loader = historical_train_loader if historical_train_loader is not None else train_loader
         _log(f"START epoch={epoch} stage=train")
         train_losses, _train_step_predictions, train_gradient_summary = run_epoch(
@@ -2179,7 +2187,7 @@ def train_experiment(config: ExperimentConfig) -> dict[str, Any]:
         "uses_pcgrad": architecture_uses_pcgrad(config.architecture),
         "uses_gradsim": architecture_uses_gradsim(config.architecture),
         "uses_swe_only_loss": swe_only_loss,
-        "uses_historical_s0_batch_replay": historical_s0_batch_verification is not None,
+        "uses_historical_batch_replay": historical_batch_verification is not None,
         "parameter_count": parameter_count,
         "best_epoch": best_epoch,
         "best_val_total_loss": best_val_loss,
@@ -2216,8 +2224,8 @@ def train_experiment(config: ExperimentConfig) -> dict[str, Any]:
             for key in best_row.keys()
             if str(key).startswith("s_") or str(key).startswith("w_")
         }
-    if historical_s0_batch_verification is not None:
-        summary["historical_s0_batch_order_verification"] = historical_s0_batch_verification
+    if historical_batch_verification is not None:
+        summary["historical_batch_order_verification"] = historical_batch_verification
     summary.update(model.extra_history_metrics())
     write_json(output_dir / "metrics_summary.json", summary)
     write_json(output_dir / "config.json", asdict(config))

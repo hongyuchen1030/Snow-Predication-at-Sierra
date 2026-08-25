@@ -20,5 +20,5 @@ mkdir -p "$output_root/logs"
     --learning-rate 1e-3 \
     --weight-decay 1e-4 \
     --num-workers 0 \
-    --historical-s0-batch-order-audit "$audit_path" \
+    --historical-batch-order-audit "$audit_path" \
     2>&1 | tee "$output_root/logs/S0_static_cnn_swe_only.log"

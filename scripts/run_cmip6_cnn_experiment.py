@@ -50,7 +50,7 @@ def main() -> None:
     parser.add_argument("--disable-amp", action="store_true")
     parser.add_argument("--split-json", default=None)
     parser.add_argument("--split-manifest", default=None)
-    parser.add_argument("--historical-s0-batch-order-audit", default=None)
+    parser.add_argument("--historical-batch-order-audit", default=None)
     args = parser.parse_args()
 
     output_dir = Path(args.output_dir) if args.output_dir else Path(args.output_root) / args.architecture
@@ -68,7 +68,7 @@ def main() -> None:
         output_dir=str(output_dir),
         split_json_path=args.split_json,
         split_manifest_path=args.split_manifest,
-        historical_s0_batch_order_audit_path=args.historical_s0_batch_order_audit,
+        historical_batch_order_audit_path=args.historical_batch_order_audit,
     )
     summary = train_experiment(config)
     print(summary)
