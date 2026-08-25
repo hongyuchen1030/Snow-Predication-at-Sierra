@@ -20,6 +20,11 @@ def read_history(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def validation_r2(row: dict[str, str]) -> float:
+    """Read both the historical and corrected history column conventions."""
+    return float(row.get("val_swe_r2", row["swe_r2"]))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--historical-root", required=True)
@@ -56,8 +61,8 @@ def main() -> None:
                 raise RuntimeError(f"{architecture}: replay has no epoch {epoch}")
             historical_loss = float(historical_row["val_total_loss"])
             replay_loss = float(replay_row["val_total_loss"])
-            historical_r2 = float(historical_row["val_swe_r2"])
-            replay_r2 = float(replay_row["val_swe_r2"])
+            historical_r2 = validation_r2(historical_row)
+            replay_r2 = validation_r2(replay_row)
             epoch_rows.append(
                 {
                     "model": architecture.split("_")[0],
@@ -79,7 +84,7 @@ def main() -> None:
         replay_at_historical_best = replay_by_epoch[historical_best_epoch]
         historical_train_r2 = float(historical_best_row["train_swe_r2"])
         corrected_train_r2 = float(replay_at_historical_best["train_swe_r2"])
-        replay_val_r2 = float(replay_at_historical_best["val_swe_r2"])
+        replay_val_r2 = validation_r2(replay_at_historical_best)
         summary_rows.append(
             {
                 "model": architecture.split("_")[0],
@@ -88,7 +93,7 @@ def main() -> None:
                 "replay_best_epoch": replay_best_epoch,
                 "historical_train_r2": historical_train_r2,
                 "corrected_train_r2": corrected_train_r2,
-                "historical_val_r2": float(historical_best_row["val_swe_r2"]),
+                "historical_val_r2": validation_r2(historical_best_row),
                 "replay_val_r2": replay_val_r2,
                 "corrected_r2_gap": corrected_train_r2 - replay_val_r2,
                 "max_abs_val_loss_difference": max(row["abs_val_total_loss_difference"] for row in model_epoch_rows),
