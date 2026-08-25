@@ -17,6 +17,7 @@ corrected-results table only after all requested results are verified.
 - output root: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1`
 - model output: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/experiments/S0_static_cnn_swe_only`
 - live log: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/logs/S0_static_cnn_swe_only.log`
+- 20-minute monitor log: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/status_20min.log`
 
 The run uses seed 20260813, batch size 2, max epochs 100, patience 15,
 AdamW learning rate 1e-3, weight decay 1e-4, AMP enabled, the original
@@ -26,6 +27,7 @@ running. Check it with:
 ```bash
 tmux capture-pane -pt s0_historical_batch_replay:0 -S -80
 squeue -j 57568228 -o '%.18i %.2t %.10M %.6D %R'
+tail -n 20 /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/status_20min.log
 ```
 
 ## Batch Replay Contract
@@ -71,3 +73,4 @@ batch order and must not be used as the historical-trajectory reproduction.
 - `scripts/run_s0_s3_evalmetrics_v2.sh`
 - `scripts/run_s1_s3_evalmetrics_retry.sh`
 - `scripts/launch_s1_s3_evalmetrics_retry_tmux.sh`
+- `scripts/monitor_s0_historical_replay.sh`
