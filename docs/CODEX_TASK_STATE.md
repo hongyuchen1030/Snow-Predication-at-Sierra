@@ -2,75 +2,89 @@
 
 Last updated: 2026-08-25 UTC
 
-## Active Task
+## Completed Work
 
-Reproduce the historical S0 no-auxiliary learning trajectory while reporting
-training metrics from an end-of-epoch eval-mode pass. Do not overwrite the
-existing "First Trial without CPM & AQM head" table in
-`docs/Current_Status3_Simulations_Trained_ml.md`. Append a separately labeled
-corrected-results table only after all requested results are verified.
+### Corrected S0-S3 Historical Replays
 
-## Active S0 Replay
+The S0-S3 no-auxiliary experiments were replayed with their historical
+optimization batch trajectories while official training metrics were computed
+from a separate post-epoch eval-mode training pass. The historical validation
+loss and validation R2 trajectories were reproduced exactly for all four
+architectures.
 
-- tmux session: `s0_historical_batch_replay`
-- Slurm allocation: `57568228`
-- output root: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1`
-- model output: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/experiments/S0_static_cnn_swe_only`
-- live log: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/logs/S0_static_cnn_swe_only.log`
-- 20-minute monitor log: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/status_20min.log`
+| Model | Historical/replay best epoch | Corrected train R2 | Replay validation R2 |
+|---|---:|---:|---:|
+| S0 | 27 | 0.550295 | 0.375452 |
+| S1 | 6 | 0.230593 | 0.239554 |
+| S2 | 4 | -0.007913 | -0.041406 |
+| S3 | 7 | 0.198131 | 0.212341 |
 
-The run uses seed 20260813, batch size 2, max epochs 100, patience 15,
-AdamW learning rate 1e-3, weight decay 1e-4, AMP enabled, the original
-cache/split, and the original S0 architecture. At the time of this note it is
-running. Check it with:
+Primary comparison report:
 
-```bash
-tmux capture-pane -pt s0_historical_batch_replay:0 -S -80
-squeue -j 57568228 -o '%.18i %.2t %.10M %.6D %R'
-tail -n 20 /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/status_20min.log
-```
+- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_historical_replay_verification_v1/historical_replay_summary.md`
+- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_historical_replay_verification_v1/epoch_by_epoch_validation_comparison.csv`
 
-## Batch Replay Contract
+Replay outputs:
 
-- persistent audit: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/historical_batch_order_audit.json`
-- per-run verification: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/experiments/S0_static_cnn_swe_only/historical_s0_batch_order_verification.json`
-- audit source initially existed only at `/tmp/cmip6_train_loader_order_audit.json` and was lost after reconnect; never use `/tmp` for handoff artifacts.
+- S0: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/experiments/S0_static_cnn_swe_only/`
+- S1-S3: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s1_s3_historical_replay_v1/experiments/`
 
-The recovered audit has exact historical S0 orders for epochs 1-3. Its original
-SHA-256 digests are verified before training. Epochs 4+ are generated from the
-same original global CPU DataLoader RNG path captured immediately after model
-initialization. This distinction must be retained in any final report.
+### S1 Attention Diagnostic and Ablations
 
-## Related Completed Artifacts
+The controlled S0/S1 diagnostic experiment is complete. It used model seed
+`20260813`, a dedicated `torch.Generator` training-sampler seed `20260825`,
+batch size 2, AdamW learning rate `1e-3`, weight decay `1e-4`, dropout 0.1 for
+the S1 attention block, maximum 100 epochs, and patience 15. Training batch
+order was identical across all variants for every shared epoch.
 
-Corrected-metric S1-S3 retry summaries are complete at:
+Completed variants:
 
-- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_swe_head_screen_evalmetrics_retry_v1/experiments/S1_static_latent_self_attention/metrics_summary.json`
-- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_swe_head_screen_evalmetrics_retry_v1/experiments/S2_static_swe_token/metrics_summary.json`
-- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_swe_head_screen_evalmetrics_retry_v1/experiments/S3_static_residual_gated_attention/metrics_summary.json`
+| Variant | Best epoch | Best validation R2 |
+|---|---:|---:|
+| E: S0 | 23 | 0.308141 |
+| A: attention only | 5 | 0.190230 |
+| B: FFN only | 19 | 0.281486 |
+| C: gated attention | 9 | 0.285705 |
+| D: full S1 | 15 | 0.249003 |
 
-The first corrected S0 v2 rerun is complete but did not preserve the historical
-batch order and must not be used as the historical-trajectory reproduction.
+Evidence summary:
 
-## Required Completion Steps
+- S1 adds exactly 2,224 trainable parameters over S0, a 0.201 percent
+  increase; this is exactly the latent attention block.
+- Full-S1 attention remains diffuse across every epoch. No row has attention
+  maximum greater than 0.75 or 0.9; there is no attention-concentration or
+  effective-rank-collapse evidence.
+- The gated-attention model finishes with gate `0.004921` and substantially
+  outperforms the un-gated attention-only path, supporting a mostly S0-like
+  direct path under this single-seed controlled experiment.
 
-1. Wait for the active S0 replay to write `history.csv` and `metrics_summary.json`.
-2. Compare every epoch's S0 validation loss and R2 to the original historical
-   S0 history at `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_swe_head_screen_v1/experiments/S0_static_cnn_swe_only/history.csv`.
-3. Report the maximum absolute validation-loss and validation-R2 differences,
-   selected best epoch, corrected eval-mode train metrics at the reproduced
-   historical best epoch, and validation metrics at that epoch.
-4. Append, do not overwrite, a labeled corrected-results table after the
-   existing first-trial table.
+Final report and plots:
 
-## Files Added Or Changed For This Task
+- `/global/homes/h/hyvchen/s1_attention_diagnostics_v1/s1_attention_diagnostic_report.md`
+- `/global/homes/h/hyvchen/s1_attention_diagnostics_v1/`
 
-- `src/snow_ml/cmip6_cnn_experiment.py`
-- `scripts/run_cmip6_cnn_experiment.py`
-- `scripts/build_s0_historical_batch_order_audit.py`
-- `scripts/run_s0_historical_batch_replay.sh`
-- `scripts/launch_s0_historical_batch_replay_tmux.sh`
-- `scripts/run_s0_s3_evalmetrics_v2.sh`
-- `scripts/run_s1_s3_evalmetrics_retry.sh`
-- `scripts/launch_s1_s3_evalmetrics_retry_tmux.sh`
-- `scripts/monitor_s0_historical_replay.sh`
+Raw diagnostic artifacts and checkpoints:
+
+- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/s1_attention_diagnostics_v1/parameter_counts.csv`
+- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/s1_attention_diagnostics_v1/ablation_history.csv`
+- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/s1_attention_diagnostics_v1/s1_latent_diagnostics.csv`
+- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/s1_attention_diagnostics_v1/s1_attention_diagnostics.csv`
+- `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/s1_attention_diagnostics_v1/checkpoints/`
+
+## Chat-Reconnect Safeguard
+
+Do not rely on a visible Codex chat transcript as the sole task record. Keep
+durable task state, commands, results, and artifact paths in this file and in
+committed scripts. Never use `/tmp` for handoff-only artifacts; temporary files
+were lost after a reconnect during the original replay work.
+
+There is no active Slurm allocation or tmux session for the completed replay or
+diagnostic experiments.
+
+## Relevant Commits
+
+- `a8f794e` Generalize historical batch replay for S1 to S3
+- `e9bca01` Support historical validation metric columns in replay report
+- `4eeedd6` Add corrected replay trajectory analysis
+- `0440aae` Add S1 attention diagnostic ablations
+- `cf3d981` Add partial S1 ablation report generator
