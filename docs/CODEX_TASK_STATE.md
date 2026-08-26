@@ -88,3 +88,61 @@ diagnostic experiments.
 - `4eeedd6` Add corrected replay trajectory analysis
 - `0440aae` Add S1 attention diagnostic ablations
 - `cf3d981` Add partial S1 ablation report generator
+
+## Active Work
+
+### Frozen S0-Z Attention Mechanism Test
+
+Scientific question: determine whether S1 attention itself degrades an
+already-good frozen S0 latent representation, or whether the end-to-end S1
+failure primarily arises from harmful gradients into the CNN encoder.
+
+- tmux session: `frozen_s0_z_attention_test`
+- Slurm allocation: `57612981`
+- node: `nid001109`
+- exact frozen S0 checkpoint:
+  `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/experiments/S0_static_cnn_swe_only/best_checkpoint.pt`
+- checkpoint provenance: S0 historical-replay best epoch 27; validation loss
+  `0.40094377089132505`
+- raw output root:
+  `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/frozen_s0_z_attention_test_v1/`
+- final plot/report root:
+  `/global/homes/h/hyvchen/frozen_s0_z_attention_test_v1/`
+- live log:
+  `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/frozen_s0_z_attention_test_v1/logs/frozen_s0_z_attention_test.log`
+
+The experiment has two branches:
+
+- `F0_frozen_S0_Z_MLP`: exact frozen S0 `backbone + project`, then a freshly
+  initialized ordinary S0-shaped MLP head.
+- `F1_frozen_S0_Z_attention`: the exact same frozen S0 `backbone + project`,
+  then freshly initialized S1 `LatentSelfAttentionBlock + MLP` head.
+
+Both use model seed `20260813`, dedicated training-sampler seed `20260826`,
+batch size 2, AdamW learning rate `1e-3`, weight decay `1e-4`, maximum 100
+epochs, and patience 15. The frozen encoder has 1,097,856 parameters
+(`backbone + project`), no dropout or BatchNorm, `requires_grad=False` for
+every parameter, and is forced to eval mode during both downstream training
+and evaluation. Each branch records encoder hashes and a fixed-batch latent
+before/after comparison; expected maximum changes are zero.
+
+Current live status at this update: F0 completed epoch 1 with eval-mode train
+R2 `0.575159`, validation R2 `0.380050`, and validation loss `0.397613`.
+
+Resume/status commands:
+
+```bash
+tmux capture-pane -pt frozen_s0_z_attention_test:0 -S -100
+tail -n 50 /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/frozen_s0_z_attention_test_v1/logs/frozen_s0_z_attention_test.log
+```
+
+Expected final artifacts:
+
+- `frozen_s0_z_metrics.csv`
+- `f1_attention_diagnostics.csv`
+- `f1_latent_diagnostics.csv`
+- `comparison_summary.csv`
+- `run_config.json` and `run_metadata.json`
+- `checkpoints/F0_frozen_S0_Z_MLP/best_trainable_downstream.pt`
+- `checkpoints/F1_frozen_S0_Z_attention/best_trainable_downstream.pt`
+- home-directory R2, loss, and F1 attention plots plus `README.md`
