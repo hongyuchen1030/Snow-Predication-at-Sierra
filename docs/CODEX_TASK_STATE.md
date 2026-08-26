@@ -60,8 +60,8 @@ Evidence summary:
 
 Final report and plots:
 
-- `/global/homes/h/hyvchen/s1_attention_diagnostics_v1/s1_attention_diagnostic_report.md`
-- `/global/homes/h/hyvchen/s1_attention_diagnostics_v1/`
+- `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/artifacts/s1_attention_diagnostics_v1/s1_attention_diagnostic_report.md`
+- `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/artifacts/s1_attention_diagnostics_v1/`
 
 Raw diagnostic artifacts and checkpoints:
 
@@ -81,6 +81,22 @@ were lost after a reconnect during the original replay work.
 There is no active Slurm allocation or tmux session for the completed replay or
 diagnostic experiments.
 
+## Storage Contract
+
+All durable task outputs must remain inside the repository. Do not create
+project output folders directly under `/global/homes/h/hyvchen/`.
+
+- Documentation and summaries: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/docs/`
+- Source and runnable scripts: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/scripts/`
+- Plots, reports, CSVs, and other durable experiment artifacts:
+  `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/artifacts/<experiment>/`
+- Large live training outputs and checkpoints: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/<experiment>/`
+
+The misplaced home-directory result folders were moved on 2026-08-25 into
+`artifacts/cmip6_historical_replay_trajectory_plots_v1/`,
+`artifacts/s1_attention_diagnostics_v1/`, and
+`artifacts/frozen_s0_z_attention_test_v1/`.
+
 ## Relevant Commits
 
 - `a8f794e` Generalize historical batch replay for S1 to S3
@@ -89,17 +105,13 @@ diagnostic experiments.
 - `0440aae` Add S1 attention diagnostic ablations
 - `cf3d981` Add partial S1 ablation report generator
 
-## Active Work
-
-### Frozen S0-Z Attention Mechanism Test
+## Frozen S0-Z Attention Mechanism Test
 
 Scientific question: determine whether S1 attention itself degrades an
 already-good frozen S0 latent representation, or whether the end-to-end S1
 failure primarily arises from harmful gradients into the CNN encoder.
 
-- tmux session: `frozen_s0_z_attention_test`
-- Slurm allocation: `57612981`
-- node: `nid001109`
+- completed allocation: `57612981` on `nid001109`
 - exact frozen S0 checkpoint:
   `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/cmip6_cnn_s0_historical_replay_v1/experiments/S0_static_cnn_swe_only/best_checkpoint.pt`
 - checkpoint provenance: S0 historical-replay best epoch 27; validation loss
@@ -107,7 +119,7 @@ failure primarily arises from harmful gradients into the CNN encoder.
 - raw output root:
   `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/frozen_s0_z_attention_test_v1/`
 - final plot/report root:
-  `/global/homes/h/hyvchen/frozen_s0_z_attention_test_v1/`
+  `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/artifacts/frozen_s0_z_attention_test_v1/`
 - live log:
   `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/frozen_s0_z_attention_test_v1/logs/frozen_s0_z_attention_test.log`
 
@@ -126,15 +138,17 @@ every parameter, and is forced to eval mode during both downstream training
 and evaluation. Each branch records encoder hashes and a fixed-batch latent
 before/after comparison; expected maximum changes are zero.
 
-Current live status at this update: F0 completed epoch 1 with eval-mode train
-R2 `0.575159`, validation R2 `0.380050`, and validation loss `0.397613`.
+Final best-validation metrics:
 
-Resume/status commands:
+| Variant | Best epoch | Eval-mode train R2 | Validation R2 | Train-minus-validation R2 |
+|---|---:|---:|---:|---:|
+| F0 frozen S0 Z + MLP | 20 | 0.600153 | 0.397116 | 0.203037 |
+| F1 frozen S0 Z + attention + MLP | 4 | 0.596605 | 0.374623 | 0.221982 |
 
-```bash
-tmux capture-pane -pt frozen_s0_z_attention_test:0 -S -100
-tail -n 50 /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/frozen_s0_z_attention_test_v1/logs/frozen_s0_z_attention_test.log
-```
+The frozen-encoder checks passed for both branches: maximum encoder parameter
+change and maximum fixed-batch latent-Z change are both zero. F1's best
+validation R2 is 0.022493 below F0's. The tmux session exited and the
+allocation was relinquished after the outputs were written.
 
 Expected final artifacts:
 
@@ -145,4 +159,4 @@ Expected final artifacts:
 - `run_config.json` and `run_metadata.json`
 - `checkpoints/F0_frozen_S0_Z_MLP/best_trainable_downstream.pt`
 - `checkpoints/F1_frozen_S0_Z_attention/best_trainable_downstream.pt`
-- home-directory R2, loss, and F1 attention plots plus `README.md`
+- R2, loss, and F1 attention plots plus `README.md` in the artifact directory
