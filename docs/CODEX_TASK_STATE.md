@@ -166,11 +166,11 @@ Expected final artifacts:
 ### TaiESM1 Daily 12-Variable One-Day Predictor Dataset
 
 - tmux session: `taiesm1_daily_12var_1day_v2`
-- pending Slurm job: `57795001` (project `m2637`, one GPU, four-hour interactive QoS)
-- current status: queued for GPU resources; no preprocessing has started
+- interactive Slurm allocation: `57797382` on `nid001093` (project `m2637`, one GPU, four-hour interactive QoS)
+- tmux status: active; CDO has generated weights and is processing historical `rlut` source years 1980-1989, with 1990-1999 next
 - launcher: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/scripts/launch_taiesm1_daily_12var_1day_predictors_tmux.sh`
 - builder: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/scripts/build_taiesm1_daily_12var_1day_predictors.py`
-- environment: `climate-utils/2025.01` for CDO, plus `uxarray_build` Python
+- environment: `climate-utils/2025.01` for CDO, plus the explicit `uxarray_build` Python executable
 - output root: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/taiesm1_daily_12var_1day_v1/`
 - durable plots/reports/CSVs, if generated: repository `artifacts/<experiment>/`, never directly under `/global/homes/h/hyvchen/`
 
