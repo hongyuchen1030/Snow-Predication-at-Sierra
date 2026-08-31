@@ -160,3 +160,22 @@ Expected final artifacts:
 - `checkpoints/F0_frozen_S0_Z_MLP/best_trainable_downstream.pt`
 - `checkpoints/F1_frozen_S0_Z_attention/best_trainable_downstream.pt`
 - R2, loss, and F1 attention plots plus `README.md` in the artifact directory
+
+## Active Work
+
+### TaiESM1 Daily 12-Variable One-Day Predictor Dataset
+
+- tmux session: `taiesm1_daily_12var_1day_v2`
+- pending Slurm job: `57795001` (project `m2637`, one GPU, four-hour interactive QoS)
+- current status: queued for GPU resources; no preprocessing has started
+- launcher: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/scripts/launch_taiesm1_daily_12var_1day_predictors_tmux.sh`
+- builder: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/scripts/build_taiesm1_daily_12var_1day_predictors.py`
+- environment: `climate-utils/2025.01` for CDO, plus `uxarray_build` Python
+- output root: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/taiesm1_daily_12var_1day_v1/`
+- durable plots/reports/CSVs, if generated: repository `artifacts/<experiment>/`, never directly under `/global/homes/h/hyvchen/`
+
+The build is data preparation only: TaiESM1 `r1i1p1f1`, historical and ssp370,
+12 specified daily channels, exact pressure-level selection, CDO bilinear
+regridding to the 1.5-degree global grid, physical values without normalization,
+and resumable per-channel/year outputs. No model training or random split is
+part of this task.
