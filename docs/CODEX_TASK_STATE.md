@@ -166,13 +166,14 @@ Expected final artifacts:
 ### TaiESM1 Daily 12-Variable One-Day Predictor Dataset
 
 - tmux session: `taiesm1_daily_12var_1day_v2`
-- interactive Slurm allocation: `57797382` on `nid001093` (project `m2637`, one GPU, four-hour interactive QoS)
-- tmux status: active; CDO has generated weights and is processing historical `rlut` source years 1980-1989, with 1990-1999 next
+- completed interactive Slurm allocation: `57797382` on `nid001093` (project `m2637`, one GPU, four-hour interactive QoS)
+- tmux status: completed; 1,440 channel/year progress markers and final metadata were written
 - launcher: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/scripts/launch_taiesm1_daily_12var_1day_predictors_tmux.sh`
 - builder: `/global/homes/h/hyvchen/Snow-Predication-at-Sierra/scripts/build_taiesm1_daily_12var_1day_predictors.py`
 - environment: `climate-utils/2025.01` for CDO, plus the explicit `uxarray_build` Python executable
 - output root: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/taiesm1_daily_12var_1day_v1/`
 - durable plots/reports/CSVs, if generated: repository `artifacts/<experiment>/`, never directly under `/global/homes/h/hyvchen/`
+- final output status: complete; `README.md`, `metadata.csv`, `metadata.npz`, `channel_units.json`, `validation_summary.json`, yearly physical arrays, validity masks, CDO grid, weights, and build log are present
 
 The build is data preparation only: TaiESM1 `r1i1p1f1`, historical and ssp370,
 12 specified daily channels, exact pressure-level selection, CDO bilinear
