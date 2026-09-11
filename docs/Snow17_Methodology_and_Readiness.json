@@ -1,7 +1,7 @@
 {
   "document": "Snow17_Methodology_and_Readiness",
   "companion_markdown": "docs/Snow17_Methodology_and_Readiness.md",
-  "last_consolidated": "2026-09-11 (restructured around Part A/B/C/D distinction for multi-lead-time intern use; Stage-1 results fully integrated as Part D)",
+  "last_consolidated": "2026-09-11 (restructured around Part A/B/C/D distinction to hold up across forecast lead times and weather generators; Stage-1 results fully integrated as Part D)",
   "supersedes_table_at": "docs/intern/permultter_snow17.md#L291-L316 (also duplicated, unmodified, at docs/intern/Catherine/Task_Gaoyinying.md)",
   "part_legend": {
     "A": "Invariant Sierra Snow-17 configuration -- does not change with forecast lead time or weather generator",
@@ -100,7 +100,7 @@
       "evidence": "DT_HOURS = 24 confirmed by direct grep across scripts/stage1_calibrate.py, scripts/snow17_smoke_test_wy1985.py, scripts/spinup_experiment.py -- the current baseline uses daily forcing, dt=24, not 6-hourly.",
       "artifact_paths": ["scripts/stage1_calibrate.py", "scripts/snow17_smoke_test_wy1985.py", "scripts/spinup_experiment.py"],
       "literature_reference": null,
-      "notes": "Explicitly flagged, not silently reconciled, against docs/intern/permultter_snow17.md's 6-hourly forcing discussion -- that document's section describes a different, Phase-2/ACE2-oriented procedure, not this project's current daily-timestep observational baseline. ACE2's own native cadence is 6-hourly (see ace2_precipitation_conversion decision); an intern using ACE2 forcing can and should run Snow-17 at dt=6 directly rather than forcing resampling to daily."
+      "notes": "Explicitly flagged, not silently reconciled, against docs/intern/permultter_snow17.md's 6-hourly forcing discussion -- that document's section describes a different, Phase-2/ACE2-oriented procedure, not this project's current daily-timestep observational baseline. ACE2's own native cadence is 6-hourly (see ace2_precipitation_conversion decision); an experiment using ACE2 forcing can and should run Snow-17 at dt=6 directly rather than forcing resampling to daily."
     },
     {
       "decision": "calibration_objective",
@@ -154,7 +154,7 @@
         "docs/snow17_reference_data/frozen_parameters/theta_N.json (GitHub-syncable copy -- use this one, added 2026-09-11)",
         "docs/snow17_reference_data/frozen_parameters/theta_C.json (GitHub-syncable copy)",
         "docs/snow17_reference_data/frozen_parameters/theta_S.json (GitHub-syncable copy)",
-        "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/theta_N.json (canonical, read by scripts/stage1_calibrate.py OUT_DIR; not reachable by interns without Perlmutter access)",
+        "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/theta_N.json (canonical, read by scripts/stage1_calibrate.py OUT_DIR; not reachable without Perlmutter access)",
         "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/theta_C.json (canonical)",
         "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/theta_S.json (canonical)",
         "artifacts/snow17_stage1_scua_validation/frozen_parameters/ (home-only mirror, same filenames, not GitHub-synced)",
@@ -195,7 +195,7 @@
         "artifacts/snow17_era5land_working_grid/provenance.md"
       ],
       "literature_reference": null,
-      "notes": "Supersedes coarsen-8 proposal (see superseded_coarsen8_grid decision). Interns are not locked into this exact grid if their experiment requires another one, but P/T/terrain/region/state must all refer to the same physically consistent spatial unit."
+      "notes": "Supersedes coarsen-8 proposal (see superseded_coarsen8_grid decision). This exact grid is not mandatory if a given experiment requires another one, but P/T/terrain/region/state must all refer to the same physically consistent spatial unit."
     },
     {
       "decision": "superseded_coarsen8_grid",
@@ -258,7 +258,7 @@
       "section": "A.6",
       "value": "dz = z_target_terrain - z_(elevation represented by the forcing). The forcing-referenced elevation is NOT automatically ERA5-Land's orography -- it must be determined per forcing source before reusing the formula.",
       "units": null,
-      "status": "NEW, derived 2026-09-11 to prevent interns blindly substituting a different forcing source's temperature while keeping z_ERA5Land fixed",
+      "status": "NEW, derived 2026-09-11 to prevent a different forcing source's temperature being substituted while keeping z_ERA5Land fixed",
       "evidence": "Generalization of the elevation_correction decision's Sierra-specific instantiation; cross-checked against docs/ACE2_Snow17_Scientific_Validity_Rule.md's independent requirement for a documented elevation-correction manifest per production run",
       "artifact_paths": ["docs/ACE2_Snow17_Scientific_Validity_Rule.md", "docs/ACE2_ERA5_WY2016_Capability_Audit.md"],
       "literature_reference": null,
@@ -402,8 +402,8 @@
       "section": "0",
       "value": "Workflow A (use frozen theta_N/C/S, default) vs Workflow B (recalibrate via SCE-UA, only for an explicit methodology experiment)",
       "units": null,
-      "status": "NEW, added 2026-09-11 for intern navigation",
-      "evidence": "Most interns running a P/T->SWE experiment should not recalibrate Snow-17; Workflow A reuses the already-validated Stage-1 frozen parameters",
+      "status": "NEW, added 2026-09-11 for reader navigation",
+      "evidence": "Most P/T->SWE experiments should not recalibrate Snow-17; Workflow A reuses the already-validated Stage-1 frozen parameters",
       "artifact_paths": ["artifacts/snow17_stage1_scua_validation/frozen_parameters/"],
       "literature_reference": null,
       "notes": "Workflow B's exact recipe (objective, split, leakage rules) is documented in Part D as a completed template, not a separate independent methodology."
