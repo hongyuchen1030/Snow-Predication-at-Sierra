@@ -1,0 +1,77 @@
+variable,model,daily_available,table,historical_start,historical_end,scenario,scenario_start,scenario_end,level_or_depth_check,notes
+tos,EC-Earth3,NO,-,,,,,,n/a,no daily files present at all (dir absent)
+tos,MIROC6,YES,Oday,1980,1999,,,,n/a (surface),"sparse: 3 chunks total (1930-39,1980-99,...); only 1980-1999 overlaps needed window"
+tos,MPI-ESM1-2-HR,NO,Oday,,,,,,n/a,"sparse, chunks pre-1905 only (e.g. 1895-1904); none overlap WY1981-2014"
+tos,TaiESM1,NO,-,,,,,,n/a,no daily Oday table exists
+siconc,EC-Earth3,NO,-,,,,,,n/a,no daily files present at all
+siconc,MIROC6,YES,SIday,1980,1999,,,,n/a (surface),sparse: 5 fragments total; only 1980-1999 chunk overlaps
+siconc,MPI-ESM1-2-HR,YES,SIday,2000,2004,,,,n/a (surface),"sparse: 4 fragments (1850-54,1895-99,2000-04,2010-14); longest single overlapping chunk is 2000-2004 (2010-2014 is a separate, shorter, later chunk)"
+siconc,TaiESM1,NO,-,,,,,,n/a,no daily SIday table exists
+rlut,EC-Earth3,NO,-,,,,,,n/a,no daily files present at all
+rlut,MIROC6,YES,day,1850,2014,ssp370,2015,2100,n/a (TOA),"fully continuous both branches, no gaps"
+rlut,MPI-ESM1-2-HR,YES,day,1850,2014,,,,n/a (TOA),"fully continuous historical, no gaps; no local ssp370 branch"
+rlut,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,n/a (TOA),"fully continuous both branches, no gaps"
+zg_500,EC-Earth3,NO,-,,,,,,n/a,day/zg directory exists but is empty (0 files)
+zg_500,MIROC6,YES,Eday,2000,2001,ssp370,2025,2028,500 hPa confirmed (plev19),sparse: 27 fragments hist / 19 ssp; only these small chunks overlap
+zg_500,MPI-ESM1-2-HR,YES,EdayZ,1975,1984,,,,500 hPa confirmed (plev19),sparse: 6 fragments; 1975-1984 is the longest overlapping chunk; no ssp370 branch
+zg_500,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,500 hPa confirmed (plev8),fully continuous both branches
+ta_850,EC-Earth3,NO,-,,,,,,n/a,day/ta directory exists but is empty
+ta_850,MIROC6,YES,Eday,2003,2004,ssp370,2073,2078,850 hPa confirmed (plev19),sparse: 24 fragments hist / 22 ssp; tiny overlapping chunks
+ta_850,MPI-ESM1-2-HR,YES,Eday,1985,1999,,,,850 hPa confirmed (plev19),sparse: 2 fragments; 1985-1999 is the overlapping one; no ssp370 branch
+ta_850,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,850 hPa confirmed (plev8),fully continuous both branches
+ua_850,EC-Earth3,NO,-,,,,,,n/a,day/ua directory exists but is empty
+ua_850,MIROC6,YES,Eday,1985,1987,ssp370,2051,2057,850 hPa confirmed (plev19),sparse: 28 fragments hist / 18 ssp; tiny overlapping chunks
+ua_850,MPI-ESM1-2-HR,YES,day,1980,1984,,,,850 hPa confirmed (plev8),"sparse: 3 fragments; CFday reaches 1850-2014 but is HYBRID-SIGMA (rejected, see Sec.0); no ssp370 branch"
+ua_850,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,850 hPa confirmed (plev8),fully continuous both branches
+va_850,EC-Earth3,NO,-,,,,,,n/a,day/va directory exists but is empty
+va_850,MIROC6,YES,Eday,1998,1999,ssp370,2078,2082,850 hPa confirmed (plev19),sparse: 24 fragments hist / 22 ssp
+va_850,MPI-ESM1-2-HR,YES,EdayZ,1980,1984,,,,850 hPa confirmed (plev19),sparse: 5 fragments; no ssp370 branch
+va_850,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,850 hPa confirmed (plev8),fully continuous both branches
+ua_200,EC-Earth3,NO,-,,,,,,n/a,day/ua directory exists but is empty
+ua_200,MIROC6,YES,Eday,1985,1987,,,,200 hPa confirmed (plev19),"sparse; ssp370 200hPa overlap not confirmed usable (plev19 Eday not present for ssp370, only day/plev8)"
+ua_200,MPI-ESM1-2-HR,YES,Eday,1985,1989,,,,200 hPa confirmed (plev19),sparse: day table (1980-84 chunk) lacks 200 hPa (plev8); Eday's only overlapping chunk is 1985-1989; CFday hybrid-sigma rejected
+ua_200,TaiESM1,NO,day,,,,,,200 hPa ABSENT from plev8,"only table available is day/plev8=[1000,850,700,500,250,100,50,10]hPa - no 200hPa at any coverage"
+va_200,EC-Earth3,NO,-,,,,,,n/a,day/va directory exists but is empty
+va_200,MIROC6,YES,Eday,1998,1999,,,,200 hPa confirmed (plev19),sparse; usable ssp370 200hPa chunk not confirmed
+va_200,MPI-ESM1-2-HR,YES,EdayZ,1980,1984,,,,200 hPa confirmed (plev19),same sparse EdayZ file set as va_850; no ssp370 branch
+va_200,TaiESM1,NO,day,,,,,,200 hPa ABSENT from plev8,"only table is day/plev8, no 200hPa at any coverage"
+hus_850,EC-Earth3,NO,-,,,,,,n/a,"day/hus directory does not exist (only huss, unrelated variable)"
+hus_850,MIROC6,YES,Eday,1850,2014,ssp370,2015,2100,850 hPa confirmed (plev19),"fully continuous both branches, no gaps"
+hus_850,MPI-ESM1-2-HR,YES,EdayZ,1850,2014,,,,850 hPa confirmed (plev19),"fully continuous historical, no gaps; no ssp370 branch"
+hus_850,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,850 hPa confirmed (plev8),fully continuous both branches
+psl,EC-Earth3,YES,day,1970,2014,ssp370,2015,2100,n/a (surface),fully continuous both branches (only variable EC-Earth3 has any real daily data for)
+psl,MIROC6,YES,day,1850,2014,ssp370,2015,2100,n/a (surface),fully continuous both branches
+psl,MPI-ESM1-2-HR,YES,day,1850,2014,,,,n/a (surface),fully continuous historical; no ssp370 branch
+psl,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,n/a (surface),fully continuous both branches
+tas,EC-Earth3,NO,-,,,,,,n/a,day/tas directory exists but is empty
+tas,MIROC6,NO,day,,,ssp370,2025,2064,n/a,"historical chunks (1890-99,1940-49) are entirely pre-1980, no overlap with needed window; ssp370 2025-2064 chunk does overlap"
+tas,MPI-ESM1-2-HR,YES,day,1980,1984,,,,n/a (surface),sparse: 4 fragments; 1980-1984 overlaps; no ssp370 branch
+tas,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,n/a (surface),fully continuous both branches
+zg_50,EC-Earth3,NO,-,,,,,,n/a,day/zg directory exists but is empty
+zg_50,MIROC6,YES,Eday,2000,2001,ssp370,2025,2028,50 hPa confirmed (plev19),same sparse Eday file set as zg_500
+zg_50,MPI-ESM1-2-HR,YES,EdayZ,1975,1984,,,,50 hPa confirmed (plev19),same sparse EdayZ file set as zg_500
+zg_50,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,50 hPa confirmed (plev8),fully continuous both branches
+ta_50,EC-Earth3,NO,-,,,,,,n/a,day/ta directory exists but is empty
+ta_50,MIROC6,YES,Eday,2003,2004,ssp370,2073,2078,50 hPa confirmed (plev19),same sparse Eday file set as ta_850
+ta_50,MPI-ESM1-2-HR,YES,Eday,1985,1999,,,,50 hPa confirmed (plev19),same sparse Eday file set as ta_850
+ta_50,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,50 hPa confirmed (plev8),fully continuous both branches
+ua_50,EC-Earth3,NO,-,,,,,,n/a,day/ua directory exists but is empty
+ua_50,MIROC6,YES,Eday,1985,1987,ssp370,2051,2057,50 hPa confirmed (plev19),same sparse Eday file set as ua_850
+ua_50,MPI-ESM1-2-HR,YES,day,1980,1984,,,,50 hPa confirmed (plev8),same sparse day file set as ua_850; CFday hybrid-sigma rejected
+ua_50,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,50 hPa confirmed (plev8),fully continuous both branches
+va_50,EC-Earth3,NO,-,,,,,,n/a,day/va directory exists but is empty
+va_50,MIROC6,YES,Eday,1998,1999,ssp370,2078,2082,50 hPa confirmed (plev19),same sparse Eday file set as va_850
+va_50,MPI-ESM1-2-HR,YES,EdayZ,1980,1984,,,,50 hPa confirmed (plev19),same sparse EdayZ file set as va_850
+va_50,TaiESM1,YES,day,1850,2014,ssp370,2015,2100,50 hPa confirmed (plev8),fully continuous both branches
+mrso,EC-Earth3,NO,-,,,,,,n/a,no daily mrso table at all
+mrso,MIROC6,YES,day,2000,2009,ssp370,2065,2084,n/a (column),sparse: 3 fragments hist / 2 ssp; only these overlap
+mrso,MPI-ESM1-2-HR,NO,day,,,,,,n/a,"chunks (1875-79...1940-44) entirely pre-1980, no overlap with WY1981-2014"
+mrso,TaiESM1,NO,-,,,,,,n/a,no daily mrso table at all
+thetao_50m,EC-Earth3,NO,-,,,,,,n/a,no daily thetao product exists at any table
+thetao_50m,MIROC6,NO,-,,,,,,n/a,no daily thetao product exists at any table
+thetao_50m,MPI-ESM1-2-HR,NO,-,,,,,,n/a,no daily thetao product exists at any table
+thetao_50m,TaiESM1,NO,-,,,,,,n/a,no daily thetao product exists at any table
+thetao_100m,EC-Earth3,NO,-,,,,,,n/a,no daily thetao product exists at any table
+thetao_100m,MIROC6,NO,-,,,,,,n/a,no daily thetao product exists at any table
+thetao_100m,MPI-ESM1-2-HR,NO,-,,,,,,n/a,no daily thetao product exists at any table
+thetao_100m,TaiESM1,NO,-,,,,,,n/a,no daily thetao product exists at any table

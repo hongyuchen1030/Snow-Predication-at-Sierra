@@ -1,0 +1,44 @@
+{
+  "seed_source": "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/home_migrated_20260828/swe_target_spatial_diagnostic/basin_assignment_grid_wy2021.npz",
+  "method": "Seed = original USGS WBD HUC8 keyword-based North/Central/South classification (unchanged). Category-B cells (Sierra-interior, HUC8-keyword-miss) filled by K-nearest-neighbor majority vote over already-assigned seed cells only. Category-A cells (outside intended Sierra region) intentionally left NaN.",
+  "k_neighbors": 16,
+  "category_b_cells_filled": 4199,
+  "category_b_fill_by_region": {
+    "Central": 57,
+    "South": 4142
+  },
+  "category_a_cells_unchanged_nan": 12719,
+  "ties_requiring_1nn_tiebreak": 0,
+  "category_b_by_huc8_name": {
+    "Upper Bear": 6,
+    "Crowley Lake": 4080,
+    "Fresno River": 53,
+    "Upper Deer-Upper White": 30,
+    "Upper Poso": 30
+  },
+  "verification_by_huc8_name": {
+    "Crowley Lake": {
+      "South": 4080
+    },
+    "Fresno River": {
+      "Central": 51,
+      "South": 2
+    },
+    "Upper Bear": {
+      "Central": 6
+    },
+    "Upper Deer-Upper White": {
+      "South": 30
+    },
+    "Upper Poso": {
+      "South": 30
+    }
+  },
+  "checks": {
+    "remaining_nan_sierra_interior_cells": 12719,
+    "category_a_confirmed_unchanged": true,
+    "seed_assigned_cells_confirmed_unchanged": true
+  },
+  "output_npz": "/global/homes/h/hyvchen/Snow-Predication-at-Sierra/artifacts/sierra_basin_assignment_knn_filled/basin_assignment_grid_wy2021_knn_filled.npz",
+  "output_nc": "/global/homes/h/hyvchen/Snow-Predication-at-Sierra/artifacts/sierra_basin_assignment_knn_filled/basin_assignment_grid_wy2021_knn_filled.nc"
+}

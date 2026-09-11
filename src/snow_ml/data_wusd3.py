@@ -219,7 +219,19 @@ def load_wusd3_snapshot(
     file_year = file_year_for_date(snapshot_date)
     path = variable_path_for_file_year(dataset, "swe", file_year)
     with xr.open_dataset(path, engine="netcdf4", decode_times=True) as ds:
-        swe = ds[WUSD3_SWE_VARIABLE].sel(day=np.datetime64(snapshot_date.isoformat()))
+        day_coord = ds[WUSD3_SWE_VARIABLE]["day"]
+        match = (
+            (day_coord.dt.year == snapshot_date.year)
+            & (day_coord.dt.month == snapshot_date.month)
+            & (day_coord.dt.day == snapshot_date.day)
+        )
+        matched_positions = np.flatnonzero(match.values)
+        if matched_positions.size != 1:
+            raise KeyError(
+                "Expected exactly one day matching %s in %s, found %d"
+                % (snapshot_date.isoformat(), path, matched_positions.size)
+            )
+        swe = ds[WUSD3_SWE_VARIABLE].isel(day=int(matched_positions[0]))
         swe = swe.astype("float32")
         swe = swe.where(np.isfinite(swe))
         swe = swe.isel(lat2d=swe_grid.row_slice, lon2d=swe_grid.col_slice)

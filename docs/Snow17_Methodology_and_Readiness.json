@@ -1,0 +1,456 @@
+{
+  "document": "Snow17_Methodology_and_Readiness",
+  "companion_markdown": "docs/Snow17_Methodology_and_Readiness.md",
+  "last_consolidated": "2026-09-11 (restructured around Part A/B/C/D distinction for multi-lead-time intern use; Stage-1 results fully integrated as Part D)",
+  "supersedes_table_at": "docs/intern/permultter_snow17.md#L291-L316 (also duplicated, unmodified, at docs/intern/Catherine/Task_Gaoyinying.md)",
+  "part_legend": {
+    "A": "Invariant Sierra Snow-17 configuration -- does not change with forecast lead time or weather generator",
+    "B": "Forecast-start state-initialization procedure -- generic recipe; only t0 itself moves per experiment",
+    "C": "Experiment-specific atmospheric forcing choices -- this is where lead time / weather-generator choice actually lives",
+    "D": "Hongyu's Stage-1 WY1985-2021 ERA5-Land calibration/validation experiment -- a specific completed instance of A-C, not a second set of universal rules"
+  },
+  "decisions": [
+    {
+      "decision": "snow17_implementation",
+      "part": "A",
+      "section": "A.1",
+      "value": "UW-Hydro tonic snow17()",
+      "units": null,
+      "status": "VERIFIED",
+      "evidence": "Vendored source read directly; exposes scf,rvs,uadj,mbase,mfmax,mfmin,tipm,nmf,plwhc,pxtemp,pxtemp1,pxtemp2 (12 total); no DAYGM/SI/ADC anywhere in source",
+      "artifact_paths": ["scripts/vendor/snow17.py", "scripts/vendor/snow17_instrumented.py"],
+      "literature_reference": "https://github.com/UW-Hydro/tonic/blob/master/tonic/models/snow17/snow17.py (commit b862801, 2015-02-25)",
+      "notes": "Use scripts/vendor/snow17.py for production; snow17_instrumented.py for diagnostics only (returns 5 internal state trajectories additionally). Matches Shiheng email: 'DAYGM is omitted and I didn't recognize ADC or SI.'"
+    },
+    {
+      "decision": "tonic_ait_typo_bug",
+      "part": "A",
+      "section": "A.1",
+      "value": "elif ((qw >= deficit) and ait((qw + w_q) <= ...)) -> elif (qw >= deficit) and ((qw + w_q) <= ...):",
+      "units": null,
+      "status": "RESOLVED",
+      "evidence": "Fixed in BOTH scripts/vendor/snow17.py and scripts/vendor/snow17_instrumented.py. Exercised successfully across all 694 Sierra cells in the smoke test and across the full Stage-1 production calibration/held-out pipeline with no errors.",
+      "artifact_paths": ["scripts/vendor/snow17.py", "scripts/vendor/snow17_instrumented.py", "artifacts/snow17_smoke_test_wy1985/", "artifacts/snow17_stage1_scua_validation/"],
+      "literature_reference": null,
+      "notes": "If you vendor a fresh copy of tonic Snow-17, check for and fix this bug -- do not assume an upstream download is already patched."
+    },
+    {
+      "decision": "tonic_internal_states",
+      "part": "A",
+      "section": "A.3",
+      "value": ["ait", "w_qx", "w_q", "w_i", "deficit"],
+      "units": null,
+      "status": "VERIFIED",
+      "evidence": "model_swe = w_i + w_q, read directly from vendored source",
+      "artifact_paths": ["scripts/vendor/snow17_instrumented.py"],
+      "literature_reference": null,
+      "notes": "SWE alone is NOT the complete state -- two snowpacks with identical SWE can have different deficit/w_q/ait and melt differently going forward."
+    },
+    {
+      "decision": "restart_state_capability",
+      "part": "A",
+      "section": "A.3",
+      "value": "No restart-state API exists in either vendored copy. snow17() hardcodes all 5 states to 0.0 internally at call start and only returns model_swe/outflow arrays for the whole input series -- it does not accept an initial-state argument and does not return final state. snow17_instrumented.py additionally RETURNS the 5 state trajectories but still does not ACCEPT them as input.",
+      "units": null,
+      "status": "VERIFIED (source-read line-by-line, both vendored copies, 2026-09-11)",
+      "evidence": "Direct inspection of scripts/vendor/snow17.py lines 116-126 (zero-init) and function return statement (only model_swe, outflow); scripts/vendor/snow17_instrumented.py lines ~43-47 (also zero-init) and its return statement (adds trajectories but still no state-input parameter).",
+      "artifact_paths": ["scripts/vendor/snow17.py", "scripts/vendor/snow17_instrumented.py"],
+      "literature_reference": null,
+      "notes": "Consequence: continuation across a forecast start date requires ONE continuous snow17() call spanning spin-up + forecast (Option B), never state serialization (Option A) -- Option A is not currently implementable without modifying the vendored function, which has not been done in this repo. This is the answer to 'can Snow-17 state be serialized/restarted': no, not with the current implementation."
+    },
+    {
+      "decision": "seven_calibrated_parameters",
+      "part": "A",
+      "section": "A.2",
+      "value": {
+        "SCF": [0.9, 1.2],
+        "MFMAX": [0.5, 1.3],
+        "MFMIN": [0.1, 0.6],
+        "UADJ": [0.05, 0.2],
+        "PXTEMP": [0.0, 2.0],
+        "PXTEMP1": [-2.0, 0.0],
+        "PXTEMP2": [0.0, 4.0]
+      },
+      "units": "see table (dimensionless / mm-C-6hr-1 / mm-mb-1 / degC)",
+      "status": "RESOLVED (bounds), FROZEN (Stage-1 regional vectors -- see stage1_frozen_theta decision)",
+      "evidence": "Verified directly from Appendix B, Table B1 of the local PDF",
+      "artifact_paths": ["docs/papers/Water Resources Research - 2024 - Duan - Using Temporal Deep Learning Models to Estimate Daily Snow Water Equivalent Over.pdf"],
+      "literature_reference": "Duan, Ullrich, Risser, Rhoades (2024), Water Resources Research 60, e2023WR035009, DOI:10.1029/2023WR035009, Appendix B Table B1",
+      "notes": "PXTEMP1/PXTEMP2 define the linear rain/snow transition band; PXTEMP is used only in the energy-budget rain-temperature term (paper's own text). The '6hr' unit on MFMAX/MFMIN is a melt_function() internal dt/6 normalization, not a requirement that dt=6 (see timestep_vs_lead_time decision)."
+    },
+    {
+      "decision": "five_fixed_parameters",
+      "part": "A",
+      "section": "A.2",
+      "value": {"RVS": 1.0, "MBASE": 1.0, "TIPM": 0.1, "NMF": 0.15, "PLWHC": 0.04},
+      "units": null,
+      "status": "RESOLVED",
+      "evidence": "Verified directly from scripts/vendor/snow17.py function signature",
+      "artifact_paths": ["scripts/vendor/snow17.py"],
+      "literature_reference": "tonic default values; TIPM docstring cites NWS Anderson manual recommended range 0.1-0.2",
+      "notes": "Shiheng did NOT document these five; not claimed he used exactly these. No alternative documented source found (paper, Zenodo 7818315, github.com/ShihengDuan/code-SWE, tonic repo -- all checked, none contain these). NMF docstring bug: text says default 0.04 (copied from plwhc), actual operative default is 0.15."
+    },
+    {
+      "decision": "timestep_vs_lead_time",
+      "part": "A",
+      "section": "A.7",
+      "value": "dt (Snow-17 integration timestep) != forecast lead time. dt must match the actual cadence of the time/prec/tair arrays passed in; snow17() asserts equal shapes and does not resample.",
+      "units": null,
+      "status": "VERIFIED / CLARIFIED",
+      "evidence": "DT_HOURS = 24 confirmed by direct grep across scripts/stage1_calibrate.py, scripts/snow17_smoke_test_wy1985.py, scripts/spinup_experiment.py -- the current baseline uses daily forcing, dt=24, not 6-hourly.",
+      "artifact_paths": ["scripts/stage1_calibrate.py", "scripts/snow17_smoke_test_wy1985.py", "scripts/spinup_experiment.py"],
+      "literature_reference": null,
+      "notes": "Explicitly flagged, not silently reconciled, against docs/intern/permultter_snow17.md's 6-hourly forcing discussion -- that document's section describes a different, Phase-2/ACE2-oriented procedure, not this project's current daily-timestep observational baseline. ACE2's own native cadence is 6-hourly (see ace2_precipitation_conversion decision); an intern using ACE2 forcing can and should run Snow-17 at dt=6 directly rather than forcing resampling to daily."
+    },
+    {
+      "decision": "calibration_objective",
+      "part": "D",
+      "section": "D.2",
+      "value": "minimize (1 - NSE), computed on full daily regional SWE trajectory (not April-1 alone)",
+      "units": null,
+      "status": "RESOLVED, RUN",
+      "evidence": "Shiheng email recollection ('if I remember correctly') + mathematical equivalence to SSE/MSE minimization for a fixed dataset since NSE denominator is constant. SCE-UA via SPOTPY (parallel='mpc', dbformat='ram', seed=42, ngs=7, kstop=5, pcento=peps=0.01) run to completion for all 3 regions.",
+      "artifact_paths": ["scripts/stage1_calibrate.py", "artifacts/snow17_stage1_scua_validation/frozen_parameters/"],
+      "literature_reference": "Nash & Sutcliffe (1970); Shiheng Duan correspondence (not an absolute confirmation, reported as recollection)",
+      "notes": "SPOTPY dbformat='csv' + parallel='mpc' was found to produce a corrupted/header-less output file in this installation; dbformat='ram' used instead, convergence CSV written manually from the returned structured array."
+    },
+    {
+      "decision": "calibration_target",
+      "part": "D",
+      "section": "D.2",
+      "value": "daily regional SWE trajectory, per-region (North/Central/South) shared 7-parameter vector; April-1 SWE is held-out evaluation only",
+      "units": null,
+      "status": "RESOLVED, RUN",
+      "evidence": "Snow-17 run pixel-wise then occupancy-weighted aggregation per region; SCE-UA run independently per region",
+      "artifact_paths": ["scripts/stage1_calibrate.py"],
+      "literature_reference": null,
+      "notes": "Produced theta_N, theta_C, theta_S -- see stage1_frozen_theta decision for exact paths and values."
+    },
+    {
+      "decision": "calibration_evaluation_split",
+      "part": "D",
+      "section": "D.3",
+      "value": {"calibration": "WY1985-2004", "evaluation_held_out": "WY2005-2021 (dedicated WY2005-2020 verification produced first, WY2021 added after)"},
+      "units": "water years",
+      "status": "RESOLVED, RUN, VALIDATED",
+      "evidence": "Single frozen calibration window, contiguous untouched held-out block -- not a LOYO scheme (Snow-17 is a calibrated physical model, not a statistical model evaluated for LOYO-style generalization). Leakage audit written and passed before any held-out metric was computed.",
+      "artifact_paths": ["artifacts/snow17_stage1_scua_validation/leakage_audit.md", "docs/Snow17_Stage1_SCEUA_Validation_Report.md"],
+      "literature_reference": null,
+      "notes": null
+    },
+    {
+      "decision": "stage1_frozen_theta",
+      "part": "D",
+      "section": "D.1",
+      "value": {
+        "North": {"scf": 1.0909866773729977, "mfmax": 0.7569711549737841, "mfmin": 0.249353735178941, "uadj": 0.05000978580648412, "pxtemp": 0.2545130569165283, "pxtemp1": -1.9989820681242425, "pxtemp2": 3.4525422250721656, "nse_calibration_wy1985_2004": 0.9448522517926142},
+        "Central": {"scf": 1.1275316534610418, "mfmax": 1.295670022710044, "mfmin": 0.5999360476187272, "uadj": 0.05029123675444507, "pxtemp": 1.0978748007114187, "pxtemp1": -1.997381626620388, "pxtemp2": 3.9943847422624668, "nse_calibration_wy1985_2004": 0.956986485101455},
+        "South": {"scf": 1.1999907936611014, "mfmax": 1.0257053747703788, "mfmin": 0.5999323531806527, "uadj": 0.05004642454056614, "pxtemp": 1.1757164557228288, "pxtemp1": -0.4038496588829371, "pxtemp2": 3.982401684308095, "nse_calibration_wy1985_2004": 0.9446166443003384}
+      },
+      "units": "see seven_calibrated_parameters for units",
+      "status": "FROZEN, REPRODUCIBILITY-VERIFIED",
+      "evidence": "Independent re-run of Snow17RegionSetup.simulation()/objectivefunction() with each saved calibrated_parameters vector (no optimizer) reproduced the recorded 1-NSE exactly for all three regions.",
+      "artifact_paths": [
+        "docs/snow17_reference_data/frozen_parameters/theta_N.json (GitHub-syncable copy -- use this one, added 2026-09-11)",
+        "docs/snow17_reference_data/frozen_parameters/theta_C.json (GitHub-syncable copy)",
+        "docs/snow17_reference_data/frozen_parameters/theta_S.json (GitHub-syncable copy)",
+        "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/theta_N.json (canonical, read by scripts/stage1_calibrate.py OUT_DIR; not reachable by interns without Perlmutter access)",
+        "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/theta_C.json (canonical)",
+        "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/theta_S.json (canonical)",
+        "artifacts/snow17_stage1_scua_validation/frozen_parameters/ (home-only mirror, same filenames, not GitHub-synced)",
+        "scripts/stage1_verify_theta.py"
+      ],
+      "literature_reference": null,
+      "notes": "UADJ saturates at its lower bound (0.05) in ALL THREE regions -- a consistent signal the pre-registered bound range may not bracket the true optimum for this domain. SCF/MFMIN/PXTEMP1/PXTEMP2 also saturate in South/Central specifically. See stage1_heldout_results decision for downstream consequences."
+    },
+    {
+      "decision": "stage1_heldout_results",
+      "part": "D",
+      "section": "D.4",
+      "value": "Held-out whole-Sierra: daily NSE=0.934, RMSE=65.4mm, r=0.982 (WY2005-2020); April-1 NSE=0.931, r=0.991, sign/anomaly agreement=93.75% across 16 years. Adding WY2021: daily NSE=0.934, April-1 r=0.991 (essentially unchanged).",
+      "units": null,
+      "status": "RUN, VALIDATED. Verdict: B (partial held-out skill, documented limitations, not yet coupled to ACE2)",
+      "evidence": "Full 9-question report with all 4 required plot types",
+      "artifact_paths": [
+        "docs/Snow17_Stage1_SCEUA_Validation_Report.md",
+        "artifacts/snow17_stage1_scua_validation/heldout_2005_2020/",
+        "artifacts/snow17_stage1_scua_validation/heldout_2005_2021/",
+        "artifacts/snow17_stage1_scua_validation/plots/"
+      ],
+      "literature_reference": null,
+      "notes": "Systematic limitation: Central/South overpredict April-1 SWE by ~30-40% on average in low-snow years (vs ~7-9% in wet years); North underpredicts the single most extreme drought year (WY2015). Melt-timing lag (mean |peak-date error| 17-22 days) in dry years. Do not use the frozen theta uncritically for drought-year-specific analysis without reading the full report."
+    },
+    {
+      "decision": "spatial_working_grid",
+      "part": "A",
+      "section": "A.5",
+      "value": "ERA5-Land native 0.1 x 0.1 deg grid",
+      "units": "degrees",
+      "status": "IMPLEMENTED",
+      "evidence": "71x46 cell working grid built and verified against ERA5-Land tp/t2m coordinate arrays",
+      "artifact_paths": [
+        "artifacts/snow17_era5land_working_grid/era5land_working_grid.npz",
+        "artifacts/snow17_era5land_working_grid/era5land_working_grid.nc",
+        "artifacts/snow17_era5land_working_grid/summary.json",
+        "artifacts/snow17_era5land_working_grid/provenance.md"
+      ],
+      "literature_reference": null,
+      "notes": "Supersedes coarsen-8 proposal (see superseded_coarsen8_grid decision). Interns are not locked into this exact grid if their experiment requires another one, but P/T/terrain/region/state must all refer to the same physically consistent spatial unit."
+    },
+    {
+      "decision": "superseded_coarsen8_grid",
+      "part": "A",
+      "section": "A.5",
+      "value": "coarsen-8 SWE grid (~3.1-4.0 km) as Snow-17 working grid, with nearest-neighbor ERA5-Land remap onto it",
+      "units": null,
+      "status": "SUPERSEDED",
+      "evidence": "coarsen-8 found ~2.8x finer than ERA5-Land (0.1deg, ~8.7-11.1km); would require upsampling ERA5-Land, the disallowed direction",
+      "artifact_paths": [
+        "artifacts/snow17_grid_alignment_audit/summary.json",
+        "artifacts/snow17_grid_alignment_audit/grid_metadata.json",
+        "artifacts/snow17_grid_alignment_audit/provenance.md"
+      ],
+      "literature_reference": null,
+      "notes": "That audit's own tentative verdict B (nearest-neighbor onto coarsen-8) is explicitly superseded by the later verdict C (discard coarsen-8, use ERA5-Land grid)."
+    },
+    {
+      "decision": "observed_swe_aggregation",
+      "part": "A",
+      "section": "A.5",
+      "value": "occupancy-weighted regional mean: SWE_r(t) = sum_i(w_ir * SWE_i(t)) / sum_i(w_ir), w_ir = native region-r pixel count per ERA5-Land cell. Whole-Sierra extends the same formula with W_r = total occupancy weight per region.",
+      "units": null,
+      "status": "VERIFIED, PRODUCTION",
+      "evidence": "Implemented in scripts/snow17_smoke_test_wy1985.py (inline) and scripts/stage1_pipeline_common.py (reusable function, preferred for new work); w_ir sums cross-checked self-consistent",
+      "artifact_paths": [
+        "artifacts/snow17_era5land_working_grid/era5land_working_grid.npz (occupancy field)",
+        "artifacts/snow17_era5land_working_grid/summary.json (29-33% naive-mean discrepancy documented)",
+        "artifacts/snow17_smoke_test_wy1985/smoke_test_summary.json",
+        "scripts/stage1_pipeline_common.py"
+      ],
+      "literature_reference": null,
+      "notes": "Naive equal-weighted mean-of-cell-means produced -28.6% to -32.6% low bias vs native flat mean, WY2021 check. Prefer stage1_pipeline_common.py's reusable implementation over re-copying the smoke test's inline version for new work."
+    },
+    {
+      "decision": "regional_mask",
+      "part": "A",
+      "section": "A.4",
+      "value": "KNN-gap-filled HUC8 CDEC mask, aggregated to ERA5-Land grid by majority vote",
+      "units": null,
+      "status": "VERIFIED",
+      "evidence": "Seed HUC8 keyword mask (110,231 cells) + KNN fill of 4,199 genuine Sierra gaps (Crowley Lake etc.), 12,719 non-Sierra cells left unassigned; aggregated to 293/224/177/2572 (N/C/S/outside) ERA5-Land cells, 47 mixed resolved by majority vote",
+      "artifact_paths": [
+        "docs/snow17_reference_data/regional_mask/basin_assignment_grid_wy2021_knn_filled.npz (GitHub-syncable copy -- use this one, added 2026-09-11)",
+        "docs/snow17_reference_data/regional_mask/basin_assignment_grid_wy2021_knn_filled.nc (GitHub-syncable copy)",
+        "docs/snow17_reference_data/regional_mask/before_after_knn_fill.png",
+        "docs/snow17_reference_data/regional_mask/crowley_lake_verification.png",
+        "docs/snow17_reference_data/regional_mask/fill_summary.json",
+        "docs/snow17_reference_data/regional_mask/provenance.md",
+        "artifacts/sierra_basin_assignment_knn_filled/ (canonical, home-only, not GitHub-synced -- same content as the docs/ copy above)",
+        "artifacts/swe_target_spatial_diagnostic/basin_assignment_grid_wy2021.npz (seed, still used by run_ocean_mode_only_swe_ridge.py/_pls.py)",
+        "artifacts/snow17_era5land_working_grid/era5land_working_grid.npz (region field; pscratch-only)"
+      ],
+      "literature_reference": null,
+      "notes": "Filename retains historical 'wy2021' but the mask is a fixed geographic classification, independent of forecast lead time, forecast start date, or weather model -- not year-varying."
+    },
+    {
+      "decision": "elevation_correction_generic_rule",
+      "part": "A",
+      "section": "A.6",
+      "value": "dz = z_target_terrain - z_(elevation represented by the forcing). The forcing-referenced elevation is NOT automatically ERA5-Land's orography -- it must be determined per forcing source before reusing the formula.",
+      "units": null,
+      "status": "NEW, derived 2026-09-11 to prevent interns blindly substituting a different forcing source's temperature while keeping z_ERA5Land fixed",
+      "evidence": "Generalization of the elevation_correction decision's Sierra-specific instantiation; cross-checked against docs/ACE2_Snow17_Scientific_Validity_Rule.md's independent requirement for a documented elevation-correction manifest per production run",
+      "artifact_paths": ["docs/ACE2_Snow17_Scientific_Validity_Rule.md", "docs/ACE2_ERA5_WY2016_Capability_Audit.md"],
+      "literature_reference": null,
+      "notes": "ERA5-Land forcing -> use ERA5-Land orography (current baseline). ACE2 -> determine elevation represented by ACE2's own grid (HGTsfc field) before reusing the formula -- not yet done/verified in this repo. Another model -> determine its forcing-grid reference orography first."
+    },
+    {
+      "decision": "elevation_correction",
+      "part": "A",
+      "section": "A.6",
+      "value": "T_corrected = T_ERA5Land + (-4.5 K/km) * (z_DEM - z_ERA5Land) / 1000",
+      "units": "K per km",
+      "status": "RESOLVED, PRODUCTION (applied throughout Stage-1 forcing cache)",
+      "evidence": "Sign convention verified against Dutra Eq.1; elevation mismatch audit quantified Delta z; applied in scripts/stage1_cache_forcing.py",
+      "artifact_paths": [
+        "artifacts/snow17_elevation_mismatch_audit/elevation_comparison.npz",
+        "artifacts/snow17_elevation_mismatch_audit/elevation_comparison.nc",
+        "artifacts/snow17_elevation_mismatch_audit/elevation_stats.json",
+        "artifacts/snow17_elevation_mismatch_audit/lapse_rate_scale_diagnostic.json",
+        "artifacts/snow17_elevation_mismatch_audit/snow_importance_diagnostic.json",
+        "artifacts/snow17_elevation_mismatch_audit/provenance.md",
+        "artifacts/dutra2020_elr_feasibility_audit/recommendation.md",
+        "scripts/stage1_cache_forcing.py"
+      ],
+      "literature_reference": "Dutra et al. (2020), DOI:10.1029/2019EA000984, Eq.1",
+      "notes": "This is the ERA5-Land-specific INSTANTIATION of elevation_correction_generic_rule -- z_ERA5Land is only the correct reference term when your forcing source is actually ERA5-Land. Full Sierra mean dz=+263.3m median=+216.9m; South mean=+359.8m; ge_1000m fraction Full Sierra=1.30%, South=5.08% (verified exactly from elevation_stats.json; an earlier recalled ~5.6% figure does not exactly match either and is flagged, not reconciled)."
+    },
+    {
+      "decision": "elevation_correction_lapse_rate_selection",
+      "part": "A",
+      "section": "A.6",
+      "value": -4.5,
+      "units": "K/km",
+      "status": "RESOLVED",
+      "evidence": "Dutra et al. (2020) own observationally-derived optimal constant (clrO) for western US incl. Sierra; outperforms -6.5 K/km; not significantly beaten by variable daily/monthly ELR, especially for land-surface snow depth/soil temperature",
+      "artifact_paths": [
+        "artifacts/dutra2020_elr_feasibility_audit/literature_method.md",
+        "artifacts/dutra2020_elr_feasibility_audit/pressure_level_approximation_feasibility.md",
+        "artifacts/dutra2020_elr_feasibility_audit/recommendation.md",
+        "artifacts/dutra2020_elr_feasibility_audit/feasibility_summary.json",
+        "artifacts/dutra2020_elr_feasibility_audit/provenance.md"
+      ],
+      "literature_reference": "Dutra, E. et al. (2020). Environmental Lapse Rate for High-Resolution Land Surface Downscaling: An Application to ERA5. Earth and Space Science, 7(3). DOI:10.1029/2019EA000984",
+      "notes": "Exact Dutra model-level method infeasible locally (no ERA5 model-level archive). Pressure-level approximation explicitly rejected: only 1-3 of Dutra's 9 native 500-1200m-AGL levels available at representative Sierra cells, worst at highest elevations. PDF filename uses a Unicode hyphen (U+2010) in 'High-Resolution' -- copy-paste the exact filename rather than retyping."
+    },
+    {
+      "decision": "dem_cache",
+      "part": "A",
+      "section": "A.6",
+      "value": "USGS NED 1/3 arc-second, 51 tiles",
+      "units": null,
+      "status": "VERIFIED",
+      "evidence": "Canonical cache confirmed intact; a briefly-made 'purged' claim during this project's own recent work was incorrect and is corrected here",
+      "artifact_paths": [
+        "/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/swe_target_spatial_diagnostic/external_data/usgs_dem/"
+      ],
+      "literature_reference": null,
+      "notes": "A redundant 1-arc-second fallback download (66 tiles) was made and never used; deleted."
+    },
+    {
+      "decision": "spinup_and_initial_state",
+      "part": "B",
+      "section": "B.2",
+      "value": {"spinup_duration": "1 year", "initial_states": "zero", "forcing": "ERA5-Land P/T", "prior_swe_required": false, "execution_mode": "one continuous snow17() call spanning spin-up + forecast, never a separate restart"},
+      "units": null,
+      "status": "VERIFIED, PRODUCTION",
+      "evidence": "1yr/2yr/3yr spin-up runs match 5-year reference exactly (all state diffs = 0.0) at 1984-10-01; 6mo run has small nonzero residuals. Sierra-specific physical basis: dry summer resets seasonal snowpack/model memory annually -- this 1-year number is not a universal Snow-17 constant.",
+      "artifact_paths": [
+        "artifacts/snow17_spinup_convergence_test/provenance.md",
+        "artifacts/snow17_spinup_convergence_test/convergence_summary_by_run.csv",
+        "artifacts/snow17_spinup_convergence_test/state_convergence_at_1984-10-01.csv",
+        "artifacts/snow17_spinup_convergence_test/swe_diff_trajectory_post_1984-10-01.csv",
+        "artifacts/snow17_spinup_convergence_test/plots/swe_at_target_date_by_spinup.png",
+        "artifacts/snow17_spinup_convergence_test/plots/swe_diff_trajectory_grid.png"
+      ],
+      "literature_reference": null,
+      "notes": "Compute: job 58137126, node nid004220, account m2637. CAVEAT still OPEN: this test used uncorrected ERA5-Land T2m (elevation correction decided later same day); substantially but not formally re-verified by the smoke test (which did use corrected T and produced sane output). This 'do not zero-init at forecast start' rule is generic (Part B); the specific '1 year' duration is a Sierra-climate-specific result."
+    },
+    {
+      "decision": "precipitation_forcing_variable",
+      "part": "C",
+      "section": "C.1",
+      "value": "ERA5-Land tp",
+      "units": "m (accumulated since 00 UTC, daily reset)",
+      "status": "RESOLVED",
+      "evidence": "Direct inspection of raw hourly values",
+      "artifact_paths": ["/global/cfs/projectdirs/m3522/datalake/ERA5-Land/total_precipitation/"],
+      "literature_reference": null,
+      "notes": null
+    },
+    {
+      "decision": "era5_land_tp_accumulation_bug",
+      "part": "C",
+      "section": "C.1",
+      "value": "correct daily tp = value at hour 00:00, attributed to preceding calendar day (NOT sum of 24 hourly values)",
+      "units": null,
+      "status": "RESOLVED, PRODUCTION (applied throughout Stage-1)",
+      "evidence": "Naive sum produced max 1284.8 mm/day (implausible); corrected rule produced max 102.4 mm/day (plausible atmospheric-river extreme), 1979-1985 test cells",
+      "artifact_paths": ["scripts/spinup_experiment.py (extract_forcing_all_years, reference implementation)", "scripts/stage1_cache_forcing.py (production reuse)"],
+      "literature_reference": null,
+      "notes": "STILL PENDING: src/snow_ml/data.py ERA5_DAILY_REDUCTIONS={'tp':'sum'} convention is the exact naive-sum pattern that caused this bug and has NOT yet been checked/fixed there. Applies to every future use of ERA5-Land/ERA5 tp in this repository, not just Snow-17."
+    },
+    {
+      "decision": "ace2_precipitation_conversion",
+      "part": "C",
+      "section": "C.2",
+      "value": "P_6h_mm = PRATEsfc (kg/m^2/s) * 21600 (s per 6h) -- dimensionally exact since 1 kg/m^2 water = 1 mm depth",
+      "units": "mm per 6-hour step",
+      "status": "DOCUMENTED, NOT YET PRODUCTION-RUN",
+      "evidence": "PRATEsfc units (kg m-2 s-1) and ACE2's 6-hour native checkpoint timestep verified from docs/ACE2_ERA5_WY2016_Capability_Audit.md",
+      "artifact_paths": ["docs/ACE2_ERA5_WY2016_Capability_Audit.md", "docs/ACE2_Snow17_Scientific_Validity_Rule.md"],
+      "literature_reference": null,
+      "notes": "Has NOT been run through a production Snow-17 forcing pipeline in this repo. The only existing ACE2->Snow-17 output (snow17_member_20151101_provisional) is an explicitly non-scientific software demonstration (ex1 example parameters, zero cold start, pressure-derived elevation) per docs/ACE2_Snow17_Scientific_Validity_Rule.md -- must not be used for science."
+    },
+    {
+      "decision": "temperature_forcing_phase1_observational",
+      "part": "C",
+      "section": "C.1",
+      "value": "ERA5-Land t2m (K->degC) + residual elevation correction vs ERA5-Land orography",
+      "units": null,
+      "status": "RESOLVED, PRODUCTION",
+      "evidence": "Current observational baseline procedure, used throughout Stage-1",
+      "artifact_paths": ["scripts/stage1_cache_forcing.py"],
+      "literature_reference": null,
+      "notes": "See elevation_correction decision for the correction term; see elevation_correction_generic_rule before assuming this reference elevation applies to a non-ERA5-Land source."
+    },
+    {
+      "decision": "temperature_forcing_phase2_ace2_cmip6",
+      "part": "C",
+      "section": "C.3",
+      "value": "T_adjusted_i = mu_CMIP + (T_ML_i - mu_ML), 6-hourly ACE-ERA5/NeuralGCM anomaly recentered on CMIP6 daily mean",
+      "units": null,
+      "status": "EXPERIMENT-SPECIFIC, NOT THE CURRENT BASELINE",
+      "evidence": "docs/intern/permultter_snow17.md lines 318-438, preserved as historical/possible-future ACE2/CMIP6 methodology, not deleted",
+      "artifact_paths": ["docs/intern/permultter_snow17.md"],
+      "literature_reference": null,
+      "notes": "Not a universal Snow-17 temperature procedure -- do not treat as the default. Its own future validity is OPEN, not evaluated in this task."
+    },
+    {
+      "decision": "workflow_selection",
+      "part": null,
+      "section": "0",
+      "value": "Workflow A (use frozen theta_N/C/S, default) vs Workflow B (recalibrate via SCE-UA, only for an explicit methodology experiment)",
+      "units": null,
+      "status": "NEW, added 2026-09-11 for intern navigation",
+      "evidence": "Most interns running a P/T->SWE experiment should not recalibrate Snow-17; Workflow A reuses the already-validated Stage-1 frozen parameters",
+      "artifact_paths": ["artifacts/snow17_stage1_scua_validation/frozen_parameters/"],
+      "literature_reference": null,
+      "notes": "Workflow B's exact recipe (objective, split, leakage rules) is documented in Part D as a completed template, not a separate independent methodology."
+    }
+  ],
+  "superseded_historical_blockers": [
+    {"old": "Complete calibrated Sierra parameter package / archived CNRFC NFDC1 configuration (major blocker)", "replaced_by": "7 calibrated + 5 fixed parameters, now FROZEN per region (stage1_frozen_theta); NFDC1 search result retained as evidence of unavailability, not an active blocker"},
+    {"old": "DAYGM - Missing", "replaced_by": "Not a tonic input (snow17_implementation decision)"},
+    {"old": "SI - Missing", "replaced_by": "Not a tonic input (snow17_implementation decision)"},
+    {"old": "ADC - Missing", "replaced_by": "Not a tonic input (snow17_implementation decision)"},
+    {"old": "Elevation-zone definitions and adjustments - Not yet obtained", "replaced_by": "Single-elevation-per-cell residual correction, elevation_correction decision + generic rule"},
+    {"old": "Initial SWE - WUS-D3 prior-day simulated SWE", "replaced_by": "1-year forcing-driven zero-state spin-up, continuous execution (spinup_and_initial_state, restart_state_capability)"},
+    {"old": "Other Snow-17 initial internal states - Not yet fully resolved", "replaced_by": "All 5 states verified to converge from zero within 1 year; restart-capability limitation now fully documented (restart_state_capability)"},
+    {"old": "coarsen-8 working grid", "replaced_by": "ERA5-Land native 0.1deg grid, spatial_working_grid decision"},
+    {"old": "arbitrary 6.5 K/km lapse rate", "replaced_by": "-4.5 K/km literature-derived, elevation_correction_lapse_rate_selection decision"},
+    {"old": "daily Dutra ELR as hard requirement", "replaced_by": "Literature-optimal constant substitute, feasibility-audited"},
+    {"old": "pressure-level Dutra approximation", "replaced_by": "Explicitly rejected on fidelity grounds, not just deprioritized"},
+    {"old": "unknown SCE-UA objective", "replaced_by": "minimize (1-NSE), calibration_objective decision, NOW RUN"},
+    {"old": "unknown fixed five parameters", "replaced_by": "five_fixed_parameters decision"},
+    {"old": "'DEM cache was purged' (statement briefly made during this project's own recent work)", "replaced_by": "Corrected: canonical cache was intact throughout, dem_cache decision"},
+    {"old": "no SCE-UA/SPOTPY code existed in the repo", "replaced_by": "Full production calibration run, frozen theta_N/C/S produced and reproducibility-verified, held-out evaluated (stage1_frozen_theta, stage1_heldout_results)"}
+  ],
+  "open_items": [
+    "src/snow_ml/data.py ERA5_DAILY_REDUCTIONS tp convention still not checked/fixed against the accumulation bug (Stage-1's own extraction code bypasses this module and is correct)",
+    "ACE2 forcing conversion (ace2_precipitation_conversion) documented but not yet exercised in any production Snow-17 run -- only existing ACE2 output is an explicit non-scientific demonstration",
+    "True Snow-17 state checkpoint/restart is not implemented (restart_state_capability) -- every experiment must re-run a continuous trajectory from spin-up through forecast end",
+    "Re-verification of the 1-year spin-up conclusion under elevation-corrected T substantially but not formally addressed (spinup_and_initial_state)",
+    "Occupancy-weighted regional aggregation exists in two places (smoke test inline, stage1_pipeline_common.py reusable) -- prefer the latter for new work",
+    "A verbally-recalled ~5.6% figure for >=1000m elevation mismatch does not exactly match either the 1.30% (Full Sierra) or 5.08% (South) verified figures -- flagged, not reconciled",
+    "ACE2 coupling itself (Phase 2) explicitly deferred -- Stage 1 used ERA5-Land only, no ACE2/CMIP6/NeuralGCM forcing has been run through the validated Snow-17 configuration yet"
+  ],
+  "contradictions_found": [
+    {
+      "description": "scripts/vendor/snow17.py once contained the original ait( typo bug while only scripts/vendor/snow17_instrumented.py had the fix.",
+      "resolution": "RESOLVED: fixed in both files, verified across the smoke test and the full Stage-1 production pipeline with no errors."
+    },
+    {
+      "description": "A verbally-recalled '~5.6%' figure for the fraction of cells with elevation mismatch >=1000m does not exactly match either the Full-Sierra (1.30%) or South-region (5.08%) figures verified directly from elevation_stats.json.",
+      "resolution": "Flagged, not reconciled. Artifact JSON values are treated as authoritative in the methodology doc."
+    },
+    {
+      "description": "docs/intern/permultter_snow17.md discusses 6-hourly forcing for temperature construction, while Stage-1's actual production pipeline (verified by grep) uses dt=24 (daily).",
+      "resolution": "Flagged, not silently reconciled (timestep_vs_lead_time decision) -- the old document's 6-hourly discussion belongs to the separate Phase-2/ACE2-oriented procedure, not the current daily-timestep observational baseline. Both are valid depending on which experiment/forcing source is in use; dt must simply match your actual forcing cadence."
+    },
+    {
+      "description": "The Dutra et al. (2020) PDF filename was transcribed with a plain ASCII hyphen in 'High-Resolution' in earlier versions of this document, but the actual file on disk uses a Unicode hyphen (U+2010).",
+      "resolution": "Corrected in this document (elevation_correction_lapse_rate_selection decision) -- copy-paste the exact filename rather than retyping it."
+    }
+  ]
+}
