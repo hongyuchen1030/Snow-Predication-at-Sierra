@@ -290,6 +290,33 @@ def r2_score(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return 1.0 - (ss_res / ss_tot)
 
 
+def rankdata_average_ties(values: np.ndarray) -> np.ndarray:
+    order = np.argsort(values, kind="mergesort")
+    ranks = np.empty(len(values), dtype=np.float64)
+    sorted_values = values[order]
+    i = 0
+    while i < len(values):
+        j = i
+        while j + 1 < len(values) and sorted_values[j + 1] == sorted_values[i]:
+            j += 1
+        average_rank = (i + j) / 2.0 + 1.0
+        ranks[order[i : j + 1]] = average_rank
+        i = j + 1
+    return ranks
+
+
+def spearman_rho(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    if y_true.size == 0:
+        return float("nan")
+    return pearson_r(rankdata_average_ties(y_true), rankdata_average_ties(y_pred))
+
+
+def wet_dry_accuracy(y_true: np.ndarray, y_pred: np.ndarray, *, threshold: float = 0.5) -> float:
+    if y_true.size == 0:
+        return float("nan")
+    return float(np.mean((y_true >= threshold) == (y_pred >= threshold)))
+
+
 def build_grouped_split(
     manifest_rows: list[dict[str, Any]],
     *,
@@ -1881,6 +1908,8 @@ def summarize_predictions(predictions: list[dict[str, Any]], target_mu: np.ndarr
         "swe_mae": float(np.mean(np.abs(swe_pred - swe_true))),
         "swe_r2": r2_score(swe_true, swe_pred),
         "swe_pearson_r": pearson_r(swe_true, swe_pred),
+        "swe_spearman_rho": spearman_rho(swe_true, swe_pred),
+        "swe_wet_dry_accuracy": wet_dry_accuracy(swe_true, swe_pred),
         "cpm_mse": float(cpm_mse),
         "cpm_pearson_r": pearson_r(cpm_true[cpm_finite], cpm_pred[cpm_finite]) if np.any(cpm_finite) else float("nan"),
         "aqm_mse": float(aqm_mse),
@@ -2111,6 +2140,8 @@ def train_experiment(config: ExperimentConfig) -> dict[str, Any]:
             "train_swe_mae": train_metrics["swe_mae"],
             "train_swe_r2": train_metrics["swe_r2"],
             "train_swe_pearson_r": train_metrics["swe_pearson_r"],
+            "train_swe_spearman_rho": train_metrics["swe_spearman_rho"],
+            "train_swe_wet_dry_accuracy": train_metrics["swe_wet_dry_accuracy"],
             "train_cpm_mse": train_metrics["cpm_mse"],
             "train_cpm_pearson_r": train_metrics["cpm_pearson_r"],
             "train_aqm_mse": train_metrics["aqm_mse"],

@@ -1,0 +1,29 @@
+experiment_dir: /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra_ace2/outputs/smoke_test
+
+n_forward_steps: 40
+
+forward_steps_in_memory: 20
+
+checkpoint_path: /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra_ace2/assets/checkpoints/ace2_era5_ckpt.tar
+
+logging:
+  log_to_screen: true
+  log_to_wandb: false
+  log_to_file: true
+  project: ace
+
+initial_condition:
+  path: /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra_ace2/assets/initial_conditions/ic_2020.nc
+  start_indices:
+    times:
+      - "2020-01-01T00:00:00"
+
+forcing_loader:
+  dataset:
+    data_path: /pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra_ace2/assets/forcing
+  num_data_workers: 2
+
+data_writer:
+  save_prediction_files: true
+  save_monthly_files: true
+  names: ["TMP2m", "VGRD10m", "PRATEsfc"]

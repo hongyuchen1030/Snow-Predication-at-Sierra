@@ -226,6 +226,13 @@ def era5_land_yearly_file(variable_name: str, year: int) -> Path:
             / "total_precipitation"
             / f"ERA5_{year}_total_precipitation.nc"
         )
+    elif variable_name in {"swvl1", "swvl2", "swvl3", "swvl4"}:
+        layer = variable_name[-1]
+        path = (
+            ERA5_LAND_ROOT_PATH
+            / f"volumetric_soil_water_layer_{layer}"
+            / f"ERA5_{year}_volumetric_soil_water_layer_{layer}.nc"
+        )
     else:
         raise ValueError(f"Unsupported ERA5-Land variable: {variable_name}")
 

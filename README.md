@@ -1,6 +1,21 @@
 
 
-W.I.P: 
+## Artifact Storage
+
+On 2026-08-28, 73 non-CMIP6 experiment artifact directories were moved from
+`artifacts/` to:
+
+`/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/home_migrated_20260828/`
+
+Their original `artifacts/<experiment>` paths are symbolic links to that
+scratch location, so existing scripts can continue to use the repository
+paths. The following remain as real directories in home and were not moved:
+
+- `artifacts/frozen_s0_z_attention_test_v1`
+- `artifacts/s1_attention_diagnostics_v1`
+- Every artifact directory whose name starts with `cmip6` (case-insensitive)
+
+W.I.P:
 
 
 SWE: Prediction: how much does sst constrain the swe std deviation at every point. run 10 000 esembles forward in time, and get their probability distribution. Use 12 months SST from last year's april to this year's april to predict SWE on April 1st this year. T2m has more time sensitive, use 2 years temp for daily values until April 1st, so as the tp. Try to predict the Jan 1 st snowpack, Jan 15th snowpack..... predict the snowpack from Jan to April and see how fast we lose the accuracy. Also use SWE on DEC 31th as an input. 
