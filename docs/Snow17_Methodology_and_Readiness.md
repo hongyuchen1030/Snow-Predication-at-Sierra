@@ -1,17 +1,16 @@
 # Snow-17 Methodology & Readiness Record
 
-**Purpose.** This document has two audiences and two jobs:
+**Purpose.** This document has two jobs:
 
 1. It is the single authoritative record of every Snow-17 methodological
    decision resolved for this project's observational/reanalysis physics
    baseline (unchanged role from earlier versions of this document).
-2. **It is the configuration reference for any intern running a Sierra
-   P/T → SWE translation experiment with Snow-17** — a 1-day forecast, a
-   3-day forecast, a 7-day forecast, any other short lead time, or a
-   different weather generator entirely (ACE2, CMIP6, or something else).
-   You should be able to read this document alone, without any chat history,
-   and correctly configure, initialize, force, and interpret Snow-17 for your
-   own experiment.
+2. **It is the configuration reference for any Sierra P/T → SWE translation
+   experiment run with Snow-17** — a 1-day forecast, a 3-day forecast, a
+   7-day forecast, any other short lead time, or a different weather
+   generator entirely (ACE2, CMIP6, or something else). This document alone,
+   without any chat history, should be enough to correctly configure,
+   initialize, force, and interpret Snow-17 for any such experiment.
 
 It replaces the old requirements table in
 [`docs/intern/permultter_snow17.md`](intern/permultter_snow17.md) (lines
@@ -73,8 +72,8 @@ Throughout, statements are tagged with one of:
 
 ### Which workflow do I need?
 
-Most interns running a Sierra P/T→SWE experiment should **not** recalibrate
-Snow-17. Two workflows:
+Most Sierra P/T→SWE experiments should **not** recalibrate Snow-17. Two
+workflows:
 
 **Workflow A — use the validated frozen translator (default; use this unless you have a specific reason not to):**
 ```
@@ -269,11 +268,11 @@ region a cell belongs to is a **fixed geographic classification**,
 independent of forecast lead time, forecast start date, or which weather
 model is driving the forcing.
 
-**Finalized mask — GitHub-syncable copy for interns (use this one):**
+**Finalized mask — use this copy:**
 `docs/snow17_reference_data/regional_mask/basin_assignment_grid_wy2021_knn_filled.npz`
 / `.nc`, plus `before_after_knn_fill.png`, `crowley_lake_verification.png`,
 `fill_summary.json`, `provenance.md` in the same folder. (Perlmutter home
-directories are not readable by interns and only `docs/` and `scripts/` are
+directories are not externally readable, and only `docs/` and `scripts/` are
 synced to GitHub, so this full-size copy lives under `docs/` rather than
 `artifacts/` specifically so it travels with the repo. Canonical/original
 location, same content: `artifacts/sierra_basin_assignment_knn_filled/`.)
@@ -332,8 +331,8 @@ coarse meteorological forcing to a finer Snow-17 grid — the project's own
 earlier "coarsen-8" proposal was rejected for exactly this reason (~2.8×
 finer than ERA5-Land, would duplicate one ERA5 value across ~5.5 neighboring
 cells with no new information; see `artifacts/snow17_grid_alignment_audit/`
-for the full superseded analysis). An intern is not locked into this exact
-grid if their scientific experiment genuinely requires another one — but
+for the full superseded analysis). This exact grid is not mandatory if a
+given experiment genuinely requires another one — but
 $P$, $T$, terrain, region, and Snow-17 state must all refer to the *same*
 physically consistent spatial unit; do not mix a forcing grid with a
 different terrain/region grid without re-deriving the mapping.
@@ -451,8 +450,8 @@ the whole time. Do not repeat the "DEM cache was purged" claim.)
 
 ## A.7 Snow-17 timestep vs. forecast lead time **[UNIVERSAL distinction]**
 
-**These are not the same thing, and conflating them is an easy intern
-mistake:**
+**These are not the same thing, and conflating them is an easy mistake to
+make:**
 
 $$
 \boxed{\texttt{dt (Snow-17's integration timestep)} \;\neq\; \texttt{forecast lead time}}
@@ -472,7 +471,7 @@ verified directly from the code (`DT_HOURS = 24` in
 `scripts/spinup_experiment.py`): daily forcing, `dt=24`.**
 
 **This is explicitly flagged, not silently reconciled**, against the older
-intern document (`docs/intern/permultter_snow17.md`), which discusses
+document (`docs/intern/permultter_snow17.md`), which discusses
 6-hourly forcing in its temperature-construction section — that section
 describes a *different, Phase-2/ACE2-oriented* procedure (§C.2 below), not
 this project's current daily-timestep observational baseline. If your
@@ -506,9 +505,9 @@ correction should be applied.
 
 # PART B — Forecast-Start State-Initialization Procedure
 
-This section is the generic recipe every intern should follow, regardless of
-lead time. **Read §A.3 first** — the reason this procedure works the way it
-does is that Snow-17 has no restart-state API.
+This section is the generic recipe to follow, regardless of lead time.
+**Read §A.3 first** — the reason this procedure works the way it does is
+that Snow-17 has no restart-state API.
 
 ## B.1 What "1-year spin-up" actually means (and does not mean)
 
@@ -531,7 +530,7 @@ practice means: one continuous `snow17()` call whose input arrays span from
 before $t_0$ through your forecast end, with state accumulated naturally by
 running through $t_0$ rather than being reset there.
 
-**Example — an intern predicting March 25 → April 1:**
+**Example — predicting March 25 → April 1:**
 ```
 preceding forcing history
        |
@@ -545,9 +544,9 @@ Snow-17 continued from the March-25 point, SAME continuous call
        |
 April-1 SWE
 ```
-They must **not** zero-initialize Snow-17 on March 25 — accumulated winter
-snow and its thermal/liquid states already exist by then, and a March-25
-cold start would discard that.
+Do **not** zero-initialize Snow-17 on March 25 — accumulated winter snow and
+its thermal/liquid states already exist by then, and a March-25 cold start
+would discard that.
 
 ## B.2 Where the "1 year" rule comes from
 
@@ -613,8 +612,8 @@ has not been done. Treat as low-risk but open.
 
 ## B.4 Worked example — 7-day forecast, March 25 → April 1
 
-Even though not every intern runs a 7-day forecast, this example makes the
-initialization logic concrete.
+Even though not every experiment uses a 7-day forecast, this example makes
+the initialization logic concrete.
 
 ```
 Scientific target:        April-1 SWE
@@ -764,9 +763,8 @@ is preserved as historical/possibly-future methodology, not deleted, and is
 | Timestep | must match your `dt` argument | daily (`dt=24`), this project's current baseline | 6-hourly (`dt=6`) native |
 | Elevation reference | $z_{\text{forcing}}$ in §A.6's formula | ERA5-Land orography | ACE2's own grid orography (`HGTsfc`) — confirm, don't assume |
 
-An intern should be able to look at this table and know: *what does Snow-17
-itself require? what does my source model actually output? what exact
-conversion connects them?*
+This table should answer: *what does Snow-17 itself require? what does a
+given source model actually output? what exact conversion connects them?*
 
 ---
 
@@ -791,7 +789,7 @@ ERA5-Land working grid (§A.5), with occupancy-weighted regional aggregation
 (§B.2), daily timestep (§A.7). Regions frozen, then evaluated **with no
 recalibration** on held-out WY2005-2020 and WY2005-2021.
 
-**Frozen parameter files — GitHub-syncable copy for interns (use this one):**
+**Frozen parameter files — use this copy:**
 ```
 docs/snow17_reference_data/frozen_parameters/theta_N.json
 docs/snow17_reference_data/frozen_parameters/theta_C.json
@@ -802,8 +800,8 @@ NSE, optimizer seed/settings, evaluation count, convergence diagnostics, git
 commit, forcing artifact path. (Canonical/production location, same content,
 also read directly by `scripts/stage1_calibrate.py`'s `OUT_DIR` at
 calibration time: `/pscratch/sd/h/hyvchen/Snow-Predication-at-Sierra/artifacts/snow17_stage1_scua_validation/frozen_parameters/`
-— not reachable by interns without Perlmutter access; the `docs/` copy above
-is the one that ships via GitHub.)
+— not reachable without Perlmutter access; the `docs/` copy above is the one
+that ships via GitHub.)
 
 **Independent reproducibility check:** re-running
 `Snow17RegionSetup.simulation()`/`objectivefunction()` directly with each
@@ -895,11 +893,11 @@ region/year breakdown before drawing conclusions in that regime.
 
 ---
 
-# Appendix I — Master intern table
+# Appendix I — Master parameter/forcing lookup table
 
 Consolidates §A.2 (parameters) and §A.8/§C (forcing) into one lookup.
 
-| Item | What Snow-17 requires | Sierra project choice | Does forecast lead change it? | Intern action | Source/path |
+| Item | What Snow-17 requires | Sierra project choice | Does forecast lead change it? | Action | Source/path |
 |---|---|---|---|---|---|
 | SCF | calibrated, 0.9-1.2 | frozen per region | No | load theta file (§D.1) | `docs/snow17_reference_data/frozen_parameters/theta_{N,C,S}.json` |
 | MFMAX | calibrated, 0.5-1.3 | frozen per region | No | load theta file | same |
@@ -971,7 +969,7 @@ Consolidates §A.2 (parameters) and §A.8/§C (forcing) into one lookup.
 
 ---
 
-## What remains genuinely OPEN (for an intern to know about, not silently absorbed)
+## What remains genuinely OPEN (documented explicitly, not silently absorbed)
 
 1. **`src/snow_ml/data.py`'s `ERA5_DAILY_REDUCTIONS` `tp` convention** — not
    yet checked/fixed against the accumulation-bug finding (§C.1). Stage 1's
@@ -1019,12 +1017,12 @@ Consolidates §A.2 (parameters) and §A.8/§C (forcing) into one lookup.
   `fill_summary.json`, `provenance.md`) and the three frozen parameter files
   (`frozen_parameters/theta_{N,C,S}.json`). These exist here, duplicated from
   their canonical `artifacts/`/pscratch locations, **specifically because
-  Perlmutter home directories are not readable by other users and only
-  `docs/` and `scripts/` are synced to this project's GitHub** — an intern
-  working from the GitHub copy of this repo would otherwise have no way to
-  reach either file. Every reference to these two artifacts elsewhere in
-  this document points at the `docs/snow17_reference_data/` copy, not the
-  canonical one, for that reason.
+  Perlmutter home directories are not externally readable and only `docs/`
+  and `scripts/` are synced to this project's GitHub** — the GitHub copy of
+  this repo would otherwise not include either file. Every reference to
+  these two artifacts elsewhere in this document points at the
+  `docs/snow17_reference_data/` copy, not the canonical one, for that
+  reason.
 - This document and its companion machine-readable manifest
   (`docs/Snow17_Methodology_and_Readiness.json`) were built by tracing every
   artifact/log/script cited above directly (including re-reading the
@@ -1033,8 +1031,9 @@ Consolidates §A.2 (parameters) and §A.8/§C (forcing) into one lookup.
   2026-09-11); no section was reconstructed from memory alone.
 - **2026-09-11 restructuring**: reorganized around the A(invariant
   config)/B(state init)/C(experiment-specific forcing)/D(Stage-1 record)
-  distinction requested for intern use across different forecast lead times
-  and weather generators. No scientific decision was changed in this pass —
+  distinction, so the document holds up across different forecast lead times
+  and weather generators without needing to be re-derived per experiment.
+  No scientific decision was changed in this pass —
   only organization, the addition of the restart-state analysis (§A.3, newly
   derived from source but not previously written down), the generic
   elevation-correction rule (§A.6), the timestep-vs-lead-time distinction
